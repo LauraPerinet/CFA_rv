@@ -338,6 +338,9 @@ background: linear-gradient(to bottom, #0063A1 0%,#005480 86%,#0063A1 100%); /* 
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063A1', endColorstr='#0063A1',GradientType=0 ); /* IE6-9 */
 }
 
+.studentTable .status5 td:last-child, .studentTable .status6 td:last-child{
+	background-color:#ff7e54;
+}
 
 
 

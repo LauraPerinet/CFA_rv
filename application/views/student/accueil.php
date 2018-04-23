@@ -1,5 +1,5 @@
 <h2>Bonjour <?php echo $student->firstname.' '.$student->name;?></h2>
-<?php if(isset($this->session->user->message) && !empty($this->session->user->message)){ ?> <p><?php echo $this->session->user->message; ?></p><?php } ?>
+<?php if(isset($this->session->user->message) && !empty($this->session->user->message)){  ?> <p><?php echo $this->session->user->message; ?></p><?php } ?>
 <h3><?php echo $subtitle; ?></h3>
 <?php foreach($formations as $form){ ?>
 	<h4><?php echo $form->formation; ?></h4>

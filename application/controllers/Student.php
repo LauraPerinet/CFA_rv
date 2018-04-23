@@ -15,6 +15,7 @@ class Student extends CI_Controller{
 		$this->load->view('forms/selectionStudents', $data);
 		$this->load->view('admin/student_table', $data);
 		$this->load->view('templates/footer', $data);
+		$this->load->view('js/showPopUp', $data);
 	}
 	
 	public function deleteStudent(){

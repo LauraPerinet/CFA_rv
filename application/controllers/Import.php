@@ -86,7 +86,7 @@ class Import extends CI_Controller{
 			$data=array(
 					'id_'.$type=>$id,
 					'id_formation'=>$id_formation,
-					'id_status'=> empty($this->db->query('SELECT * FROM '.$type.'calendar WHERE id_formation ='.$id_formation)->result()) ? ($type=="candidate" ? 0 : 10) : 1
+					'id_status'=> empty($this->db->query('SELECT * FROM '.$type.'_calendar WHERE id_formation ='.$id_formation)->result()) ? ($type=="candidate" ? 0 : 10) : 1
 			);
 			$this->db->insert($type.'_formation', $data);
 		}

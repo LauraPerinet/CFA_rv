@@ -1,5 +1,6 @@
 
 <script>
+	//closeTabsFormation
 	document.getElementById("tabs").classList.remove('hidden');
 	var candidates={
 		"selected":true,

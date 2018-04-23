@@ -1,7 +1,7 @@
 <div id="selection<?php echo $type; ?>">
 <h2>Recherche</h2>
 	<div class="form">
-		<form action="" method="post" />
+		<?php echo form_open('formation/admin/'.$thisForm->id,array('id'=>"selectionForm",'method'=>'post')); ?>
 			<div>
 				<label for="status">Statut : </label>
 				<select name="<?php echo $type; ?>_status" id="status">
@@ -11,7 +11,7 @@
 					<?php }?>
 				</select>
 			</div>
-			<div><input type="submit" value="Rechercher" /></div>
+			<div><input type="submit" value="Rechercher" form="selectionForm"/></div>
 		</form>
 	</div>
 </div>

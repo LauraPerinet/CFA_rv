@@ -1,9 +1,23 @@
 
 <div id="calendar<?php echo $type;?>">
-<?php echo form_open('Formation/deleteCalendar'); ?>
-		<input type="hidden" name="type" value="<?php echo $type;?>" />
-		<input type="hidden" name="id_formation" value="<?php echo $thisForm->id;?>" />
-		<input type="submit" value="Supprimer les sessions selectionnées" />
+<?php echo form_open('Formation/changeCalendar'); ?>
+	<button type="button" onclick="showPopUp('popupSup', 'meetings')">Supprimer</button>
+			<div id="popupSup" class="popup hidden">
+				<p>Attention !</p>
+				<p>Êtes vous certain de vouloir supprimer ces sessions ?</p>
+				<p><span id="numDelete" class="hidden">Des étudiants sont déjà positionnés !</span></p>
+				<div>
+					<input type="hidden" name="type" value="<?php echo $type;?>" />
+					<input type="hidden" name="id_formation" value="<?php echo $thisForm->id;?>" />
+					<input type="submit" name="delete" value="Tout à fait certain" />
+					<button type="button" onclick="showPopUp()">Non, surtout pas !</button>
+				</div>
+			</div>
+
+
+		<label>Salle : </label><input name="location">
+		<input type="submit" name="changeLocation" value="Changer la salle" />
+
 
 
 <?php
@@ -60,26 +74,3 @@
 
 </form>
 </div>
-<script>
-	var selectAll=document.getElementsByClassName("selectAll");
-	var meetings=document.getElementsByClassName("meeting");
-	
-	for(var i=0; i<selectAll.length; i++){
-		selectAll[i].addEventListener("click", selection);
-	}
-
-
-	function selection(e){
-		var allMeetings = document.querySelectorAll("input[type=checkbox]."+e.target.getAttribute("data-day"));
-		for(var i=0; i<allMeetings.length; i++){
-			allMeetings[i].checked=e.target.checked;
-			var li= allMeetings[i].parentNode;
-			if(e.target.checked){
-				if(!li.classList.contains("selected")) li.classList.add("selected");
-			}else{
-				li.classList.remove("selected");
-			}
-		}
-	}
-
-</script>

@@ -1,1 +1,1 @@
-<div id="container<?php echo $type; ?>">
+<div id="container">
