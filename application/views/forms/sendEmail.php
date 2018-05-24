@@ -1,6 +1,7 @@
+<div id="toHide">
 <h2>Envoyer un email</h2>
-<div class="form">
-	<?php echo form_open('emailing/sendEmail',array('id'=>"formEmail",'method'=>'post')); ?>
+<div class="form noHidden">
+	<form action="<?php echo site_url('emailing/sendEmail'); ?>" method="post" id="formEmail">
 		<div>
 			<label for="typeEmail">Email :</label>
 			<select name="typeEmail">
@@ -12,6 +13,7 @@
 		<input type="hidden" name="type" value="<?php echo $type; ?>" />
 		<input type="hidden" name="id_formation" value="<?php echo $thisForm->id; ?>" />
 		<input type="hidden" name="days" value="<?php foreach($calendar as $key=>$day){ echo $key.", "; }?>" />
-		<input type="submit" value="Envoyer" form="formEmail"/>
+		<input type="submit" value="Envoyer" />
 	</form>
+</div>
 </div>

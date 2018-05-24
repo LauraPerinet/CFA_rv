@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta name="robots" content="noindex, nofollow">
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
 	<title>
 		Prise de rendez-vous | CFA des SCIENCES
 	</title>
@@ -13,8 +15,9 @@
 
 		<nav>
 			<ul>
-					<li><a href="<?php echo site_url('pages/accueil'); ?>"><img id="logo_cfa" src="https://www.cfa-sciences.fr/sites/upmc/files/CFA%20des%20sciences%20simple_2.png" /></a></li>
-				<?php  if(isset($this->session->user) && $this->session->user->type=="admin"){ ?>
+					<li><a href="<?php echo site_url('pages/accueil'); ?>"><img id="logo_cfa" src="https://www.cfa-sciences.fr/sites/upmc/files/CFA%20des%20sciences%20simple_2.png" alt="Accueil" /></a></li>
+				<?php  if(isset($this->session->user)){
+					if($this->session->user->type=="admin"){ ?>
 					<li><a href="<?php echo site_url('student/view'); ?>">Apprentis</a></li>
 					<li>Calendriers
 						<div class="submenu">
@@ -27,25 +30,12 @@
 						</div>
 					</li>
 					<li>
-						Export
-						<div class="submenu" id="export">
-							<form method="post" action="<?php echo base_url("index.php/formation/export")?>">
-	
-								<label>Entretien de selection : </label><input type="radio" name="type" value="candidate" selected="selected" />
-								<label>Soutenance : </label><input type="radio" name="type" value="student" />
-							<?php foreach($formations as $formation){?>
-									<li class="submenu">
-			
-										<input type="checkbox" name="formation[]" value="<?php echo $formation->id;?>"/> 
-										<?php echo $formation->ypareo; ?>
-									</li>
-							<?php }?>
-								<input type="submit" value="Exporter les tableaux"/>
-							</form>
-						</div>
+						<a href="<?php echo site_url("formation/export"); ?>">Export<a>
 					</li>
-				<?php }?>
+				<?php }
+				?>
 				<li><a href="<?php echo site_url('login/disconnect'); ?>" />Deconnexion</a></li>
+				<?php } ?>
 			</ul>
 		</nav>
 	</header>

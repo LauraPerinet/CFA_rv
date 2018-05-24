@@ -1,0 +1,1 @@
+<h2>Cette page est réservée aux administrateurs du site.</h2>

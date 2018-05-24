@@ -1,27 +1,26 @@
-header{
+header, h1, button, footer, .form, form{
 	display:none;
 }
-h1{
-	display:none;
-}
+
 #pageExport{
 	width:15cm;
 
 }
-.page{
-	height:27.5cm;
+#pageExport .formation h2{
+	display:block !important;
 }
-table{
-	border-collapse:collapse;
-	width:100%;
 
+#pageExport table{
+	margin-top:0;
+	page-break-inside:avoid;
+	page-break-after:always;
 }
-td{
-	height:1.2cm;
+#pageExport td{
+	height:1cm;
 }
-td:first-child{
+#pageExport td:first-child{
 	width:2cm;
 }
-td:last-child{
+#pageExport td:last-child{
 	width:2cm;
 }

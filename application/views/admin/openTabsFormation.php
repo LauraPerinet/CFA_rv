@@ -1,4 +1,4 @@
-<div id="tabs" class="hidden"> 
+<div id="tabs" class=""> 
 	<h2 class="<?php echo $type=="candidate" ? "selected" :""; ?>">
 		<a href=" <?php echo site_url('formation/admin/'.$thisForm->id.'/candidate'); ?>">Candidats</a>
 	</h2>

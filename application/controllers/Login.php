@@ -1,39 +1,41 @@
 <?php
 
 class Login extends CI_Controller {
-	public function view($page='login'){
-		
-		$data['title'] = ucfirst($page);
-		
+	public function __construct(){
+		parent::__construct();
 		$this->load->helper(array('form', 'url'));
-		if(isset($this->session->user)){
-				redirect("pages/view");
-		};
 		$this->load->library('form_validation');
 		
+		$this->load->model('student_model', 'studentManager');
+	}
+	
+	public function view($page='login'){
+		if(isset($this->session->user)) redirect("pages/accueil");
+		$data["problems"]="";
+		$goIn=false;
+		$data['title'] = ucfirst($page);
 		$this->form_validation->set_rules('email', 'Email', 'required|valid_email');
 		$this->form_validation->set_rules('password', 'Mot de passe', 'required');
 		
-		$this->load->view('templates/header', $data);
 		
-		if($this->form_validation->run()===true){
-			if($this->testConnexion()){
-				redirect("pages/accueil");
-			}else{
-
-				$this->load->view('forms/'.$page, $data);
+		if($this->form_validation->run()===true){ 
+			if($this->testConnexion()){ $goIn=true; }else{
+				$data["problems"].="<br/>L'email ou le mot de passe est invalide.<br/>";
 			}
-		}else{
-			
-			$this->load->view('forms/'.$page, $data);
 		}
 		
-		$this->load->view('templates/footer', $data);
+		if($goIn){ 
+			redirect("pages/accueil"); 
+		}else{
+			$this->load->view('templates/header', $data); 
+			$this->load->view('forms/'.$page, $data);
+			$this->load->view('templates/footer', $data);
+		}
+		
 	}
 	
 	public function disconnect(){
 		session_destroy();
-		$this->load->helper('url');
 		redirect('login/view');
 		
 	}
@@ -41,10 +43,7 @@ class Login extends CI_Controller {
 	private function testConnexion(){
 		$email = $this->input->post("email");
 		$table = (!strpos($email, "@cfa-sciences.fr") && !strpos($email, "@cci-paris-idf.fr")) ? $this->input->post('type') : "admin";
-		
-		$query=$this->db->query('SELECT * FROM '.$table.' where email="'.$email.'"' );
-
-		$user=$query->row();
+		$user=$this->studentManager->getOne($table, "email", '"'.$email.'"');
 		
 		if($user!=null && $user->password===$this->input->post("password")){
 			$this->session->user=$user;

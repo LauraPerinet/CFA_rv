@@ -1,4 +1,8 @@
 *{outline:none; padding:0; margin:0;}
+	a{
+		text-decoration:none;
+		color:#474747;
+	}
 html{
 	box-sizing:border-box;
 	font-family: 'Montserrat', sans-serif;
@@ -116,6 +120,42 @@ header nav>ul>li div.submenu li.submenu:hover a{
 	0%{	height:0;}
 	100%{ height:400px;}
 }
+/* ------------------------  Accueil ADMIN  */
+.infographie{
+	display:flex;
+	justify-content:space-between;
+}
+.infographie .nb{
+	max-width:200px;
+	text-align:center;
+}
+.nb p:first-child{
+	font-weight:bold;
+	font-size:3em;
+	color:#0063A1;
+}
+.nb p.green{
+	color:#d1dd7e;
+}
+.nb p.orange{
+	color:#eabc48;
+}
+.nb p.red{
+	color:#ce7862;
+}
+.nb p.gray{
+	color:#878189;
+}
+
+/*---------------------------------- FOOTER ----*/
+footer{
+	padding:30px 0;
+	text-align:right;
+}
+footer a{
+	padding-right:30px;
+	font-weight:bold;
+}
 
 /*---------------------------------- FORMULAIRES */
 
@@ -123,6 +163,7 @@ header nav>ul>li div.submenu li.submenu:hover a{
 	border:1px solid #474747;
 	padding:10px;
 	vertical-align:bottom;
+	transition: height 2s;
 }
 .form label:not(.inline){
 	display:block;
@@ -145,12 +186,22 @@ header nav>ul>li div.submenu li.submenu:hover a{
 	box-shadow:inset 0 1px 1px rgba(0,0,0,0.075), 0 0 8px rgba(102,175,233,0.6);
 }
 
-.form form{
+.form:not(.naturalDisplay) form{
 	display:flex;
 	justify-content:space-between;
 	align-items:flex-end;
 }
-input[type="submit"], button{
+textarea{
+	width:98%;
+	margin-top:20px;
+	resize:none;
+	overflow:auto;
+	height:200px;
+	font-family:'Montserrat', sans-serif;
+	padding:1%;
+	outline:none;
+}
+input[type="submit"], button, .btn{
 	background: #0063A1;
     color: #fff;
     border:1px solid #0063A1;
@@ -169,7 +220,7 @@ input.realDelete{
 	border-color:#cc0000;
 	background-color: #cc0000;
 }
-input[type="submit"]:hover, button:hover{
+input[type="submit"]:hover, button:hover, .btn:hover{
 	color:#0063A1;
 	background-color:white;
 	
@@ -191,10 +242,28 @@ input.realDelete:hover{
 	font-weight:bold;
 	color:#c33;
 }
+
+.menuBtn button{
+	background:none;
+	color:#0063A1;
+	border:none;
+	text-align:left;
+	padding-left:0;
+}
+.menuBtn button::after{
+	content:"→";
+	font-weight:bold;
+	font-size:1.5em;
+}
+.menuBtn button:hover::after, .menuBtn button.open::after{
+	content:"↓";
+}
+.menuBtn button.open:hover::after{
+	content:"↑";
+}
 /*----------------------------- Tabs and containers */
 #tabs{
 	border-bottom:3px solid #0063A1;
-	text-align:center;
 }
 #tabs h2{
 	display:inline-block;
@@ -203,15 +272,26 @@ input.realDelete:hover{
 	color:#afcadb;
 	cursor:pointer;
 	margin-bottom:0;
+	text-align:center;
+}
+#tabs h2 a{
+	color:#afcadb;
 }
 #tabs h2:hover{
 	background-color:#afcadb;
+	color:#0063A1;
+}
+#tabs h2:hover a{
 	color:#0063A1;
 }
 #tabs h2.selected{
 		background-color:#0063A1;
 		color:#fff;
 }
+#tabs h2.selected a{
+	color:#fff;
+}
+
 #tabs h2.selected:hover{
 	cursor:default;
 }
@@ -252,11 +332,16 @@ input.realDelete:hover{
 }
 
 .dayBox .meeting input[type="checkbox"]{display:none;}
+.dayBox .meeting .infobloc input[type="checkbox"]{display:inline;}
 .available{
 	background-color:#fff;
 }
+
 .notAvailable{
 	background-color:#ccd;
+}
+.particular{
+	background-color:#edcc74;
 }
 .clear{
 	clear:both;
@@ -284,12 +369,12 @@ input.realDelete:hover{
 
 .infobloc{
 	background-color:#fff;
-	width:40%;
 	border:3px solid #0063A1;
 	box-shadow:0 5px 5px rgba(0,0,0,0.5);
 	z-index:2;
 	position:relative;
 	width:0px;
+	max-height:180px;
 	left:50px;
 	top:-50px;
 	line-height:18px;
@@ -304,29 +389,59 @@ input.realDelete:hover{
 	animation-duration:0.2s;
 	width:180px;
 }
+#calendars.student .meeting .infobloc *{
+	opacity:0;
+}
+#calendars.student .meeting:hover .infobloc *{
+	opacity:1;
+	animation-name:infoblocP;
+	animation-duration:0.2s;
+}
+
+#calendars.student .self{
+	background-color:#d1dd7e;
+}
+#calendars.student .infobloc{
+	font-size:12px;
+}
+#calendars.student .infobloc p:first-child{
+	font-weight:bold;
+	margin-bottom:10px;
+}
 @keyframes infobloc{
 	0%{	width:0;}
-	100%{ width:180px;;}
+	100%{ width:180px; }
+}
+@keyframes infoblocP{
+	0%{opacity:0;}
+	80%{opacity:0;}
+	100%{opacity:1;}
 }
 /*-----------------------------TABLEAU ETUDIANTS */
 .studentTable table{
 	width:100%;
+	border-collapse:collapse;
+}
+.studentTable table table td{
+	border:0;
+}
+.studentTable table table td:last-child{
+	text-align:right;
 }
 .studentTable button{
 	margin-bottom:15px;
 }
-.studentTable tr{
-background: #ffffff; /* Old browsers */
-background: -moz-linear-gradient(top, #ffffff 0%, #fefeff 86%, #deeeef 100%); /* FF3.6-15 */
-background: -webkit-linear-gradient(top, #ffffff 0%,#fefeff 86%,#deeeef 100%); /* Chrome10-25,Safari5.1-6 */
-background: linear-gradient(to bottom, #ffffff 0%,#fefeff 86%,#deeeef 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#deeeef',GradientType=0 ); /* IE6-9 */
 
-}
 .studentTable td, th{
 	border:#0063A1 1px solid;
 	border-bottom:#005480 2px solid;
 	padding:5px 15px;
+}
+.studentTable tr tr:not(:last-child){
+	border-bottom:1px #aaa solid;
+}
+.studentTable tr tr td:first-child{
+	width:60%;
 }
 .studentTable th{
 padding:15px 15px;
@@ -337,13 +452,142 @@ background: -webkit-linear-gradient(top, #0063A1 0%,#005480 86%,#0063A1 100%); /
 background: linear-gradient(to bottom, #0063A1 0%,#005480 86%,#0063A1 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063A1', endColorstr='#0063A1',GradientType=0 ); /* IE6-9 */
 }
-
-.studentTable .status5 td:last-child, .studentTable .status6 td:last-child{
+.studentTable .status1 td:last-child, td.status1, .studentTable .status4 td:last-child, td.status4{
+	background-color:#fcf688;
+}
+.studentTable .status5 td:last-child, .studentTable .status6 td:last-child, td.status5, td.status6{
 	background-color:#ff7e54;
+}
+.studentTable .status3 td:last-child, td.status3{
+	background-color:#d1dd7e;
+}
+.studentTable .status7 td:last-child, td.status7{
+	background-color:#9c969e;
+}
+.studentTable .status2 td:last-child, td.status2{
+	background-color:#c5e5f9;
+}
+
+/*------------------- PAGE EXPORT */
+#pageExport .formation h2:not(:first-child){
+	display:none;
+}
+#pageExport table{
+	width:100%;
+	border-collapse:collapse;
+	margin-top:20px;
+	
+}
+#pageExport td{
+	padding:5px;
+}
+#pageExport td:first-child,#pageExport td:last-child{
+	width:90px;
+	text-align:center;
 }
 
 
+/*---------------------------ESCPACE ETUDIANTS ------ */
+.liste_formation_student h4{
+	padding:10px 0 20px 0;
+	margin-top:30px;
+	border-top:3px solid #0063A1;
+}
 
+.student a:not(.btn){
+	font-weight:bold;
+	color:#0063A1;
+	
+}
+.student a:not(.btn):hover{
+	color:#555;
+}
+.msgSent{
+	background-color:#e7e7e7;
+	padding:20px;
+	margin:20px 0;
+}
+
+.contact img{
+	vertical-align:top;
+	max-width:50%;
+	min-width:400px;
+}
+.contact div{
+	display:inline-block;
+	width:40%;
+}
+.contact{
+	display:flex;
+	justify-content:space-between;
+}
+.contact p{
+	margin-top:10px;
+}
+@media only screen and (max-width: 600px){
+	.global form select,.global form input:not([type="submit"]){
+		width:90%;
+		padding:5%;
+		margin:2% 0;
+	}
+	button, .button{
+		max-width:90%;
+	}
+	header nav{
+		margin-top:0;
+	}
+	#logo_cfa{
+		height:130%;
+		width:auto;
+		margin-top:0;
+	}
+	header nav>ul li:last-child, header nav>ul li a {
+		font-size:1em;
+		text-align:right;
+	}
+	header nav>ul>li:not(:first-child):after{
+		margin-left:0;
+	}
+	
+	.dayBox{
+		margin:20px 0;
+		max-width:100%;
+		width:100%;
+		box-shadow:none;
+	}
+	.meeting{
+		clear:both;
+		width:100%;
+		text-align:left;
+	}
+	.meeting span:not(.hiddeOnMob), .meeting div{
+		display:inline-block;
+		border:none;
+		
+		text-align:center;
+		box-shadow:none;
+	}
+	.meeting span:not(.hiddeOnMob){
+		width:20%;
+		
+	}
+	.infobloc{
+		width:80%;
+		padding:0;
+	}
+	
+	#calendars.student .meeting .infobloc *{
+		opacity:1;
+		margin-top:0;
+	}
+	.hiddeOnMob{
+		display:none;
+	}
+	.contact img, .contact div{
+		width:100%;
+		max-width:100%;
+	}
+}
 
 
 

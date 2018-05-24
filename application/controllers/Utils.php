@@ -9,6 +9,16 @@ class Utils{
 		$frMonth=$frenchMonth[$d->format('n')-1];
 		return $frDay." ".$d->format('d')." ".$frMonth." ".$d->format('Y');;
 	}
-
-	
+	public static function getDateMax($day){
+		$date=new DateTime($day);
+		$subDays=3;
+		if($date->format("w")<2) $subDays=5;
+		$date->sub(new DateInterval('P'.$subDays.'D'));
+		return($date);
+	}
+	public static function canStillChange($day){
+		$maxDate=Utils::getDateMax($day);
+		$today=new DateTime();
+		return $maxDate->diff($today)->invert;
+	}
 }

@@ -1,7 +1,16 @@
 <h2>Référent_s de la formation</h2>
-<p>Les personnes cochées recevront un email pour tout changement concernant les calendriers de la formation</p>
-<div class="form">
+<ul>
+	<?php foreach($admin as $adm){
+				if(!empty($adm->isRef)) echo '<li>• '.$adm->firstname." ".$adm->name.'<li>'; 
+	}?> 
+</ul>
+<div class="menuBtn hidden"><button  type="button" data-form='addReferent'>
+	Modifier les référents
+	</button> 
+</div>
+<div class="form" id="addReferent">
 	<?php echo form_open('formation/changeReferend'); ?>
+		
 		<div>
 			<p id="refError" class="hidden error">Vous devez entrer au moins un référent.</p>
 			<label for="email">Référents </label>

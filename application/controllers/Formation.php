@@ -8,12 +8,17 @@ class Formation extends CI_Controller{
 		$this->load->helper('url', "form");
 		if(!isset($this->session->user)) redirect("login/view");
 		$this->load->library('form_validation');
-		$this->formations=$this->db->query("SELECT * FROM formation")->result();
+		
+		$this->load->model('formation_model', 'formationManager');
+		$this->load->model('calendar_model', 'calendarManager');
+		$this->load->model('student_model', 'studentManager');
+		$this->formations=$this->formationManager->getAll();
 		require("Utils.php");
 	}
 	
 	public function admin($id_formation=null, $type="candidate"){	
-		if(!isset($this->session->user->type) || $this->session->user->type!=="admin") show_403();
+
+		if(!isset($this->session->user->type) || $this->session->user->type!=="admin") redirect("pages/accueil/403");;
 		if($id_formation==null) redirect("pages/accueil");	
 		$data['admin']=$this->getAdmins($id_formation);
 		$data['problems']=$this->problems;
@@ -29,15 +34,17 @@ class Formation extends CI_Controller{
 		if($type=="candidate"){ $subtitle="Candidats";}else{ $subtitle="Apprentis";}
 		//View
 		
-
+		
 		$data['classe']="tabContainer";
 		$data['subtitle']=$subtitle;
 		$data['type']=$type;
 		$data['calendar']=$this->getMeetings($id_formation, $type);
 		$data['students']=$this->getStudents($id_formation, $type);
-		$data['status']=$this->db->query('SELECT * FROM status WHERE type="'.$type.'"')->result();
-		$data['query'][$type.'_status']= $this->input->post($type.'_status') ? $this->input->post($type.'_status') : "";
+		$data['status']=$this->formationManager->getStatus($type);
+		$data['query'][$type.'_status']= $this->input->post($type.'_status')!==null ? $this->input->post($type.'_status') : "";
+		
 		$this->load->view('templates/header', $data);
+		if($this->session->lastAction=="createCalendar".$id_formation || $this->session->lastAction=="updateCalendar".$id_formation) $this->load->view('templates/msgSent');
 		$this->load->view('forms/referents', $data);
 		if(!empty($this->problems)) $this->load->view('admin/problems_import');
 		$this->load->view('admin/openTabsFormation', $data);
@@ -48,6 +55,7 @@ class Formation extends CI_Controller{
 		$this->load->view('admin/student_table', $data);
 		$this->load->view('js/scriptCalendar', $data);
 		$this->load->view('js/showPopUp', $data);
+		$this->load->view('js/openMenu', $data);
 		$this->load->view('templates/footer', $data);
 
 
@@ -55,15 +63,28 @@ class Formation extends CI_Controller{
 	
 	public function inscription($id_formation=null){
 		if($id_formation==null ) redirect("pages/accueil");
-		
-		$data['title']= "Inscription";
-		$data['subtitle']= "";
+		//Test si l'utilisateur s'est déjà positionné et si oui, s'il peut encore le changer.
+		if($oldMeeting = $this->calendarManager->getOne($this->session->user->type, $this->session->user->id, $id_formation)){
+			if(!Utils::canStillChange(explode(" ",$oldMeeting->dateRV)[0])) redirect("pages/accueil");
+		}
+		$data['title']= $oldMeeting ? "Modification de votre date d'entretien": "Inscription à une date d'entretien";
+		$data['subtitle']= $this->formationManager->getOne('id', $id_formation, 'formation');
 		$data['formation']=$id_formation;
 		$data['type']=$this->session->user->type;
-		$data['calendar']=$this->getMeetings($id_formation, $this->session->user->type);
-		
+		$data['calendar']=$this->getMeetings($id_formation, $this->session->user->type, false);
+		$data['problems']=$this->problems;
+
 		$this->load->view('templates/header', $data);
 		$this->load->view('student/calendar', $data);
+		$this->load->view('templates/footer', $data);
+	}
+	
+	public function contact($id_formation=null){
+		if(!$id_formation) redirect("page/accueil");
+		$data['title']="Problème pour l'inscription";
+		$data['formation']=$id_formation;
+		$this->load->view('templates/header', $data);
+		$this->load->view('forms/problemInscription', $data);
 		$this->load->view('templates/footer', $data);
 	}
 	
@@ -74,73 +95,86 @@ class Formation extends CI_Controller{
 			&& ($this->input->post('hourStop')!==null && !empty($this->input->post('hourStop')))
 			&& ($this->input->post('step')!==null && !empty($this->input->post('step')))
 		){
+
 			$d=new DateTime($this->input->post('date').$this->input->post('hourStart'));
+			var_dump($d);
 			$dmax= new DateTime($this->input->post('date').$this->input->post('hourStop'));
 			$type=$this->input->post('type');
-			$id_formation=$this->input->post('id_formation');
-
-			$i=0;
-			while($d<$dmax && $i<100){
-				$data=array(
-					"dateRV"=>$d->format('Y-m-d H:i:sP'),
-					"id_formation"=>$id_formation,
-					"location"=>$this->input->post('location')
-				);
-				$i++;
-				$d->add(new DateInterval('PT'.$this->input->post('step').'M'));
-				$this->db->insert($type."_calendar", $data);
+			$id_formation=$this->input->post('formation');
+			if($this->input->post('step')!=-5){
+				$step=$this->input->post('step');
+				$i=0;
+			}else{
+				$step=0;
+				$i=99;
 			}
-			
-			if($i>=100) echo "erreur";
-			$status = $type=="candidate" ? 0 : 10;
-			if($location===""){}
-			$this->db->query('UPDATE '.$type.'_formation SET id_status='.($status+1).' WHERE id_status='.$status.' AND id_formation='.$id_formation); 
+			while($d<$dmax && $i<100){
+				
+				$id=$this->calendarManager->createCalendar($type, $d, $id_formation, $this->input->post('location'), $this->input->post("student"));
+				$d->add(new DateInterval('PT'.$step.'M'));
+				$i++;
+			}
+			if($this->input->post('step')!=-5){
+				$redirect="formation/admin/".$this->input->post('formation');
+				$status = $type=="candidate" ? 0 : 10;
+				$this->formationManager->updateOldStatus($type, $id_formation, $status);
+			}else{
+				$this->checkInscription(1, $id);
+				
+				//$redirect="formation/checkInscription/1/".$id;
+			}
+
+			$this->session->lastAction="createCalendar".$id_formation;
+			$this->session->message="Le calendrier a été créé.";
 		}else{ 
 			$this->problems.="Tous les champs sont obligatoires.";
 		}
-		redirect("formation/admin/".$this->input->post('id_formation'));
+		
+		//redirect($redirect);
 	}
+	
 	public function changeCalendar(){
 		$meetings=$this->input->post('meeting');
 		$type=$this->input->post('type');
-		$formation=$this->input->post('id_formation');
-		echo "youhou";
+		$formation=$this->input->post('formation');
+
 		if($this->input->post('delete')){
 			$this->deleteCalendar($meetings, $type, $formation);
+			$this->session->message="Les dates ont été supprimées.";
 		}else if($this->input->post('changeLocation')){
 			$this->changeLocation($meetings, $type, $formation, $this->input->post("location"));
+			$this->session->message="La salle a été modifiée.";
 		}
+		$this->session->lastAction="updateCalendar".$formation;
+		
 		redirect("formation/admin/".$formation);
 	}
 	
 	private function deleteCalendar($meetings, $type, $formation){
 		if($meetings){
 			foreach($meetings as $meeting) {
-				$id_candidate=$this->db->query("SELECT id_".$type." FROM ".$type."_calendar WHERE id=".$meeting)->row()->id_candidate;
-				if($id_candidate!=="0") {
-					$this->db->query("UPDATE ".$type."_formation SET id_status=6 WHERE id_candidate=".$id_candidate." AND id_formation=".$formation);
+				$id_student=$this->calendarManager->getOneById($type, $meeting, 'id_'.$type);
+				if($id_student!=="0") {
+					$this->formationManager->updateStatus($type, $id_student, $formation, 6);
 				}
-				$this->db->query('DELETE FROM '.$type.'_calendar WHERE id='.$meeting);
+				$this->calendarManager->deleteCalendar($type, $meeting);
 			}
 		};
-		
 	}
 
 	private function changeLocation($meetings, $type, $formation, $location){
 		if($meetings && $location ){
 			foreach($meetings as $meeting) {
-				$this->db->set("location", $location);
-				$this->db->where("id", $meeting);
-				$this->db->update($type."_calendar");
+				$this->calendarManager->updateLocation($type, $meeting, $location);
 			}
 		}
 	}
 	
-	private function getMeetings($id_formation, $type){
+	private function getMeetings($id_formation, $type, $getParticular=true){
 		$meetings= array();
 		$day="";
 		$today=new DateTime();
-		foreach($this->db->query("SELECT * FROM ".$type."_calendar WHERE id_formation=".$id_formation.' ORDER BY dateRV')->result() as $calendar){
+		foreach($this->calendarManager->selectAllByFormation($type, $id_formation, $getParticular) as $calendar){
 			$date=explode(" ", $calendar->dateRV);
 			$fullDate;
 			if($day!==$date[0]){
@@ -148,7 +182,7 @@ class Formation extends CI_Controller{
 				$fullDate=Utils::getFullDate($day);
 				$meetings[$fullDate]=array();
 			}
-			array_push($meetings[$fullDate], array("id"=>$calendar->id,"hour"=>substr($date[1], 0, 5), "id_student"=> $type=="student" ? $calendar->id_student : $calendar->id_candidate, "location"=>$calendar->location ));
+			array_push($meetings[$fullDate], array("id"=>$calendar->id,"hour"=>substr($date[1], 0, 5), "id_student"=> $type=="student" ? $calendar->id_student : $calendar->id_candidate, "location"=>$calendar->location, "skype"=>$calendar->skype, "particular"=>$calendar->particular ));
 		}
 		return $meetings;
 	}
@@ -156,79 +190,161 @@ class Formation extends CI_Controller{
 	
 	
 	private function getStudents($id_formation, $type){
-		$query='SELECT '.$type.'.id, name, firstname, email, phone, date_candidature, id_status, status 
-		FROM '.$type.', '.$type.'_formation, status 
-		WHERE id_'.$type.'='.$type.'.id 
-		AND status.id=id_status AND id_formation='.$id_formation;
 		
-		if($this->input->post($type.'_status')!==null) $query .= " AND id_status=".$this->input->post($type.'_status') ;
-		
-		$students=$this->db->query($query )->result();
-		return $students;
+		$status=$this->input->post($type."_status")!=="all" ? $this->input->post($type."_status") : null;
+		return $this->studentManager->getAllStudentsByFormation($type, $id_formation, $status);
+
 	}
-	
-	public function checkInscription(){
+	public function adminInscription(){
+		if($this->input->post("meeting")) $this->checkInscription(1);
+		if($this->input->post("cancelMeeting")){
+			$type=$this->input->post("type");
+			
+			$id_meeting=$this->input->post('cancelMeeting');
+			$this->calendarManager->cancelMeeting($type, $id_meeting);
+			
+			//$student=$this->studentManager->getOne($type, "id", $this->input->post('student'));
+			$this->formationManager->updateStatus($type, $this->input->post('student'), $this->input->post('formation'), 7);
+			redirect("emailing/sendEmailAuto/".$type."/".$this->input->post('student')."/".$this->input->post('formation')."/1/1");
+			
+			//redirect("student/casParticulier/".$type."/".$this->input->post('student'));
+		}
+	}
+	public function checkInscription($fromAdmin=0, $id_meeting=null){
+
 		$this->problems="";
 		$problem="Le rendez-vous n'est plus disponible ! Merci de choisir une autre date";
-		$id_meeting=$this->input->post('meeting');
-		$student=$this->session->user;
+		$id_meeting=$this->input->post('meeting')!=null ? $this->input->post('meeting') : $id_meeting;
 		
-		$meeting=$this->db->query('SELECT id, id_'.$student->type.' AS id_student, location FROM '.$student->type.'_calendar WHERE id='.$id_meeting)->row();
-		if($meeting->id_student == 0){
-			$this->db->query('UPDATE '.$student->type.'_calendar 
-				SET id_'.$student->type.'='.$student->id.' 
-				WHERE id='.$id_meeting);
-			if($this->db->query('SELECT id_'.$student->type.' AS id_student FROM '.$student->type.'_calendar WHERE id='.$id_meeting)->row()->id_student==$student->id){
+		if($fromAdmin!=0){
+			
+			$type=$this->input->post("type");
+			$student=$this->studentManager->getOne($type, "id", $this->input->post('student'));
+			$redirect="emailing/sendEmailAuto/".$type."/".$student->id."/".$this->input->post("formation")."/1";
+
+		}else{
+			$student=$this->session->user;
+			$type=$student->type;
+			$redirect="emailing/sendEmailAuto";
+		}
+		$meeting=$this->calendarManager->getOneById($type, $id_meeting);
+		if($meeting->id_student == 0 || $meeting->id_student == $student->id){
+			$skype= $this->input->post("skype")!==null ? $this->input->post("skype") : 0;
+			$this->calendarManager->updateStudent($type, $id_meeting, $student->id, $this->input->post('formation'), $skype);
+			if($this->calendarManager->getOneById($type, $id_meeting)->id_student==$student->id){
 				$new_status=3;
-				print_r($meeting);
-				if($meeting->location==="") $new_status=4;
-				$this->db->query('UPDATE '.$student->type.'_formation SET id_status='.$new_status.' WHERE id_'.$student->type.'='.$student->id.' AND id_formation='.$this->input->post("formation"));
+				if($meeting->location==="" && $skype!=1) $new_status=4;
+				$this->formationManager->updateStatus($type, $student->id, $this->input->post('formation'), $new_status);
 				$student->message="Merci de votre inscription. Vous allez recevoir un email récapitulatif.";
 				$this->session->user->formation=$this->input->post("formation");
-				redirect("emailing/sendEmailAuto");
+				redirect($redirect);
+			}else{
+				$this->problems.="statut pas changé";
 			}
 		}else{
 			$this->problems.=$problem;
 		}
-		redirect("pages/accueil");
+
+			$this->inscription($this->input->post("formation"));
+			
 	}
 	
-	public function export(){
+	public function export($csv=false){
 		$type=$this->input->post("type");
 		$meetings=array();
 		$data["formations"]=$this->formations;
-		foreach($this->input->post("formation") as $formation){
-			$formation_name=$this->db->query("SELECT ypareo FROM formation WHERE id=".$formation)->row()->ypareo;
-			$meetings[$formation_name]=$this->getMeetings($formation, $type);
-			foreach($meetings[$formation_name] as $date=>$sessions){
-				for($i=0; $i<count($sessions);$i++){
-					if($sessions[$i]['id_student']!=="0") $meetings[$formation_name][$date][$i]["student"]=$this->db->query("SELECT * FROM ".$this->input->post('type')." WHERE id=".$sessions[$i]["id_student"])->row();}} 
+		$data["formationsSelected"]=$this->input->post("formation");
+		$data["title"]="Exporter les calendriers";
+		$data["type"]=$type;
+		
+		if($this->input->post("formation")!=null){
+			
+			foreach($this->input->post("formation") as $formation){
+				$formation_name=$this->formationManager->getOne('id', $formation, 'ypareo');
+				$meetings[$formation_name]=$this->getMeetings($formation, $type);
+				
+				foreach($meetings[$formation_name] as $date=>$meeting){
+					for($i=0; $i<count($meeting);$i++){
+						if($meeting[$i]['id_student']!=="0"){ 
+							$meetings[$formation_name][$date][$i]['student']=$this->studentManager->getOne($type, 'id',$meeting[$i]["id_student"]); 
+						}
+					}
+				} 
+			}
+			$data["meetings"]=$meetings;
+
+			$data["imprime"]=true;
+			if($csv){
+				$this->exportCSV($meetings, $type);
+			}
+			
 		}
-		$data["meetings"]=$meetings;
-		$data["imprime"]=true;
 		$this->load->view('templates/header', $data);
 		$this->load->view('admin/export', $data);
+		$this->load->view('templates/footer', $data);
 		
 	}
+	
 	public function changeReferend(){
-		$this->db->query("DELETE FROM admin_formation WHERE id_formation=".$this->input->post("id_formation"));
+		$this->formationManager->deleteReferend($this->input->post("id_formation"));
 		if(count($this->input->post("admin"))>0){
 			foreach($this->input->post("admin") as $admin){
-				$data=array(
-					"id_admin"=>$admin,
-					"id_formation"=>$this->input->post("id_formation")
-				);
-				$this->db->insert("admin_formation", $data);
+				$this->formationManager->addReferend($admin, $this->input->post("id_formation"));
 			}
 		}
 		redirect("formation/admin/".$this->input->post("id_formation"));
 	}
+	
 	private function getAdmins($id_formation){
-		$admins=$this->db->query("SELECT * FROM admin")->result();
-		foreach($admins as $admin){
-			$admin->isRef=$this->db->query("SELECT * FROM admin_formation WHERE id_admin=".$admin->id." AND id_formation=".$id_formation)->row();
+		return $this->formationManager->getAdmins($id_formation);
+		
+	}
+	
+	private function exportCSV($meetings, $type){
+		header('Content-type: text/csv;charset=UTF-8');
+		$filename="CFAexportRV_".$type."_".date('Y-m-d').".csv";
+		header('Content-Disposition: attachment; filename="'.$filename.'"');
+		 
+		// do not cache the file
+		header('Pragma: no-cache');
+		header('Expires: 0');
+		 
+		// create a file pointer connected to the output stream
+		$file = fopen('php://output', 'w');
+		 
+		// send the column headers
+		fputcsv($file, array('Formation', 'Date de l\'entretien', 'Heure', 'Salle', 'Nom du candidat', 'Prénom du candidat', 'Email du candidat', 'Telephone du candidat', 'Skype'),";");
+		 
+		// Sample data. This can be fetched from mysql too
+		$data = array();
+		foreach($meetings as $formation=>$days){
+			foreach($days as $day=>$sessions){
+				foreach($sessions as $meeting){
+					if(!isset($meeting["student"])) {
+						$name="";
+						$firstname="";
+						$email="";
+						$phone="";
+					}else{
+						$name=$meeting["student"]->name;
+						$firstname=$meeting["student"]->firstname;
+						$email=$meeting["student"]->email;
+						$phone=$meeting["student"]->phone;
+					}
+					$row=array($formation, $day, $meeting["hour"], $meeting["location"], $name, $firstname, $email, $phone, $meeting["skype"]==0?"":"OUI");
+					
+					array_push($data, $row);
+				}
+			}
 		}
-		return $admins;
+		 
+		// output each row of the data
+		foreach ($data as $row)
+		{
+		fputcsv($file, $row, ";");
+		}
+		 
+		exit();
 	}
 }
 

@@ -1,5 +1,6 @@
 <?php
 class Import extends CI_Controller{
+	
 	private $template=[
 				"PORTABLE_COURRIER"=>"",
                 "NOM_FORMATION_SOUHAITE"=>"",
@@ -9,16 +10,21 @@ class Import extends CI_Controller{
         ];
 	private $problems;
 	
-	private function view(){
+	public function __construct(){
+		parent::__construct();
 		$this->load->helper('url');
 		if(!isset($this->session->user)) redirect("login/view");
-		if(!isset($this->session->user->type) || $this->session->user->type!=="admin") show_403();
+		$this->load->model('formation_model', 'formationManager');
+		$this->load->model('student_model', 'studentManager');
+		$this->load->model('calendar_model', 'calendarManager');
+	}
+	private function view(){
+		if(!isset($this->session->user->type) || $this->session->user->type!=="admin") redirect("pages/accueil/403");
 		if(empty($this->problems)) redirect('student/view');
-		
-		
+
 		$data['problems']=$this->problems;
 		$data['title']="L'importation ne s'est pas bien passé...";
-		$data["formations"] = $this->db->query("SELECT * FROM formation")->result();
+		$data["formations"] = $this->formationManager->getAll();
 		
 		$this->load->view('templates/header', $data);
 		$this->load->view('admin/problems_import', $data);
@@ -26,7 +32,26 @@ class Import extends CI_Controller{
 		$this->load->view('templates/footer', $data);
 		
 	}
+	public function createFormations($newFormation=null, $type=null){
+		$data["newFormation"]=$newFormation;
+		$data["formations"] = $this->formationManager->getAll();
+		$data["type"]=$type;
+		$this->load->helper('form');
+		$this->load->view('templates/header', $data);
+		
+		if($newFormation===null){
+			$ypareo=$this->input->post("ypareo");
+			for($i=0; $i<count($ypareo); $i++){
+				$this->formationManager->createOne($ypareo[$i], $this->input->post("formation".$i));
+			}
+			$this->createStudent($this->input->post('type'));
+		}else{
+			$this->load->view('forms/createFormations', $data);
+		}
+		$this->load->view('templates/footer', $data);
+	}
 	public function importStudent(){
+		$students=array();
 		$this->problems="";
 		if(isset($_FILES['fileRV']) && ($file = fopen($_FILES['fileRV']['tmp_name'], 'r')) !== false){
 			$row =1;
@@ -35,60 +60,86 @@ class Import extends CI_Controller{
 				if($row==1){
 					if(!$this->testHeader($lign)) break;
 				}else if($this->testLign($lign, $row)){
-					$this->createStudent($lign, $this->input->post('type'));
+					$studentLign=array(
+						"student"=>array(
+							"name"=>$lign[$this->template["NOM_APPRENANT"]],
+							"firstname"=>$lign[$this->template["PRENOM_APPRENANT"]],
+							"email"=>$lign[$this->template["EMAIL_COURRIER"]],
+							"phone"=>$lign[$this->template["PORTABLE_COURRIER"]],
+							"date_candidature"=>date('Y'),
+							"password"=>$this->createPassword()
+							),
+						"formation"=>$lign[$this->template["NOM_FORMATION_SOUHAITE"]]
+					
+				);
+					array_push($students, $studentLign);
+					
 				}
 				$row++;
 			}
 			fclose($file);
 			
+			$newFormation=array();
+			foreach($students as $student){
+				if(!$this->formationManager->getOne("ypareo", '"'.$student["formation"].'"')){
+					$exist=false;
+					for($i=0; $i<count($newFormation); $i++){ 
+						if($newFormation[$i] == $student["formation"]){
+							$exist=true; 
+							break;
+						}
+					}
+					if(!$exist) array_push($newFormation, $student["formation"]);
+				}				
+			}
+			
+			if(!empty($newFormation)){
+				$this->createFormations($newFormation, $this->input->post('type'));
+			}else{
+				$this->session->students=$students;
+				$this->createStudent($this->input->post('type'));
+			}
+
 		}else{
 			$this->problems .= "<br/>Le fichier n'a pas pu être importé.";
         }
-		if(empty($this->problems)){
-			$this->load->helper('url');
-			redirect("student/view");
-		}
-		$this->view();
+		
 	}
 	
-	private function createStudent($lign, $type){
-		$query=$this->db->query('SELECT id FROM '.$type.' WHERE email ="'.$lign[$this->template["EMAIL_COURRIER"]].'"');
-		if(!(isset($query->row()->id))){
-			$data=array(
-					"name"=>$lign[$this->template["NOM_APPRENANT"]],
-					"firstname"=>$lign[$this->template["PRENOM_APPRENANT"]],
-					"email"=>$lign[$this->template["EMAIL_COURRIER"]],
-					"phone"=>$lign[$this->template["PORTABLE_COURRIER"]],
-					"date_candidature"=>date('Y'),
-					"password"=>$this->createPassword(),
-					
-				);
-			$this->db->insert( $type , $data);
-			$id=$this->db->query('SELECT id FROM '.$type.' WHERE email ="'.$lign[$this->template["EMAIL_COURRIER"]].'"')->row()->id;
-		}else{
-			$id=$query->row()->id;
-		}
+	private function createStudent($type){
 		
-		$this->createJoin($lign[$this->template["NOM_FORMATION_SOUHAITE"]], $id, $type);
+		foreach($this->session->students as $student){
+			
+			$id=$this->studentManager->getOne($type, "email", '"'.$student["student"]["email"].'"', 'id');
+			
+			if(!(isset($id))){
+				$id=$this->studentManager->createNewStudent($type, $student["student"]);
+				
+			}
+
+			$this->createJoin($student["formation"], $id, $type);
+		}
+		if(empty($this->problems)){
+			$this->session->lastAction="importStudent";
+			$this->session->message="Le fichier a bien été importé.";
+			
+		}else{
+			$this->session->lastAction="importStudent";
+			$this->session->message=$this->problems;
+		}
+		redirect("student/view");
 	}
 	
 	private function createJoin($formation, $id, $type){
-		if(!isset($this->db->query('SELECT id FROM formation WHERE ypareo ="'.$formation.'"')->row()->id)){
+		$id_formation=$this->formationManager->getOne("ypareo", '"'.$formation.'"', 'id');
+		if($id_formation==null){
 			$this->problems.="</br> probleme formation : ".$formation;
 			return false;
-		}else{
-			$id_formation=$this->db->query('SELECT id FROM formation WHERE ypareo ="'.$formation.'"')->row()->id;
 		}
-		if(!empty($test=$this->db->query('SELECT * FROM '.$type.'_formation WHERE id_'.$type.'='.$id.' AND id_formation='.$id_formation)->result())){
+		if(!empty($this->formationManager->getOneRelation($type, $id, $id_formation))){
 			$this->problems.="<br/> Candidature déjà prise en compte";
 		}else{
-			 
-			$data=array(
-					'id_'.$type=>$id,
-					'id_formation'=>$id_formation,
-					'id_status'=> empty($this->db->query('SELECT * FROM '.$type.'_calendar WHERE id_formation ='.$id_formation)->result()) ? ($type=="candidate" ? 0 : 10) : 1
-			);
-			$this->db->insert($type.'_formation', $data);
+			 $this->formationManager->createNewRelation($type,$id, $id_formation, $this->calendarManager->selectAllByFormation($type, $id_formation));
 		}
 	}
 

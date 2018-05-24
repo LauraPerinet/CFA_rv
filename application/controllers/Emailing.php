@@ -5,19 +5,23 @@ class Emailing extends CI_Controller{
 	public function __construct(){
 		parent::__construct();
 		$this->load->helper('url');
+		if(!isset($this->session->user)) redirect("login/view");
+		$this->load->model('formation_model', 'formationManager');
+		$this->load->model('student_model', 'studentManager');
+		$this->load->model('calendar_model', 'calendarManager');
 		require('Mailin_SENDINBLUE.php');
 		require('Utils.php');
 	}
+	
 	private function view($id_formation=null, $email=null){
 
-		//if($id_formation==null) show_404();
+		if($id_formation==null) redirect("pages/accueil/404");
 		//if(empty($this->problems)) redirect("formation/admin/".$id_formation);
-		if(!isset($this->session->user)) redirect("login/view");
-		if(!isset($this->session->user->type) || $this->session->user->type!=="admin") show_403();
+		if(!isset($this->session->user->type) || $this->session->user->type!=="admin") redirect("pages/accueil/403");;
 		
 		$data['email']=$email;
 		$data['to']=$this->to;
-		$data['formations']=$this->db->query("SELECT * FROM formation")->result();
+		$data['formations']=$this->formationManager->getAll();
 		$data['title'] = "Envoi d'email";
 		$data['problems']=$this->problems;
 		$this->load->view('templates/header', $data);
@@ -34,11 +38,11 @@ class Emailing extends CI_Controller{
 		};
 		$this->to="";
 		$type=$this->input->post('type');
-		$formation=$this->db->query('SELECT * FROM formation WHERE id='.$this->input->post('id_formation'))->row();
+		$formation=$this->formationManager->getOne("id",$this->input->post('id_formation'));
 		$email=null;
 		foreach($idStudents as $id){
 			if(!empty($this->to)) $this->to.=', ';
-			$student = $this->db->query("SELECT * FROM ".$type." INNER JOIN ".$type."_formation ON id_".$type."=".$type.".id AND id_formation=".$this->input->post('id_formation')." WHERE id =".$id)->row();
+			$student = $this->studentManager->getStudentByRelation($type, $id, $formation->id);
 			switch($this->input->post('typeEmail')){
 				case "prise-de-rendez-vous":
 					$old_status=[1];
@@ -48,12 +52,12 @@ class Emailing extends CI_Controller{
 				case "precision-salle":
 					$old_status=[4];
 					$new_status=3;
-					$meeting=$this->db->query("SELECT * FROM ".$type."_calendar WHERE id_".$type."=".$id." AND id_formation=".$formation->id)->row();
+					$meeting=$this->calendarManager->getOne($type, $id, $formation->id);
 					break;
 				case "erratum-session-reportee":
 					$old_status=[5,6];
 					$new_status=2;
-					$meeting=$this->db->query("SELECT * FROM ".$type."_calendar WHERE id_".$type."=".$id." AND id_formation=".$formation->id)->row();
+					$meeting=$this->calendarManager->getOne($type, $id, $formation->id);
 					break;
 			}
 			
@@ -62,7 +66,7 @@ class Emailing extends CI_Controller{
 					$error=false;
 					$this->to .= $student->name;
 					if($email=$this->sendMessage($this->input->post('typeEmail'), $formation, $meeting, $student)){
-						$this->db->query("UPDATE ".$type."_formation SET id_status=".$new_status." WHERE id_".$type."=".$id." AND id_formation=".$formation->id);
+						$this->formationManager->updateStatus($type, $id, $formation->id, $new_status);
 					}else{
 						$this->problems.='<br/>'.$student->name.' '.$student->firstname.' : Message non envoyé.';
 					}
@@ -73,27 +77,63 @@ class Emailing extends CI_Controller{
 			if($error) $this->problems.='<br/>'.$student->name.' '.$student->firstname.' n\'est pas concerné par ce type d\'information.';
 		}
 		$this->view($formation->id, $email);
+	}
+	public function sendEmailProblem(){
+		$this->formationManager->updateStatus($this->session->user->type, $this->session->user->id, $this->input->post("formation"), 5);
+		$referends=$this->formationManager->getReferends($this->input->post("formation"));
+		
+		foreach($referends as $admin){
+			$email=$this->sendMessage($this->input->post('typeEmail'), $this->formationManager->getOne("id", $this->input->post("formation")), null, $this->session->user, $admin, $this->input->post("message"));
+			$this->session->user->message="Votre message a été envoyé. Nous vous recontacterons prochainement.";
+		}
+
+		redirect("pages/accueil");
 		
 	}
 	
-	public function sendEmailAuto(){
-		$student=$this->session->user;
-		$formation=$this->db->query("select * from formation where id=".$student->formation)->row();
-		$meeting=$this->db->query("SELECT * FROM ".$student->type."_calendar WHERE id_".$student->type."=".$student->id." AND id_formation=".$student->formation)->row();
-		if($email=$this->sendMessage("confirmation-entretien", $formation, $meeting, $student)){
+	public function sendEmailAuto($type=null, $id_student=null, $id_formation=null, $fromAdmin=false, $cancel=false){
+		if($type && $id_student && $id_formation){
+			$student=$this->studentManager->getOne($type, "id", $id_student);
+			$student->formation=$id_formation;
+			$student->type=$type;
+		}else{
+			$student=$this->session->user;
+		}
+		if($cancel){
+			$msgAdmin="annulation";
+			$msgStudent="annulationStudent";
+			$meeting=null;
+			$skype= null;
+		}else{
+			$msgAdmin="nouveau-positionnement-entretiens";
+			$msgStudent="confirmation-entretien";
+			
+			$meeting=$this->calendarManager->getOne($student->type, $student->id, $student->formation);
+			$skype= $meeting->skype==0 ? false : true;
+		}
+		$formation=$this->formationManager->getOne("id", $student->formation);
+	
+		
+		if($email=$this->sendMessage($msgStudent, $formation, $meeting, $student, null,null, $skype)){
 			$student->message=$email['html'];
 		}else{
 			$student->message="Nous n'avons pas pu vous envoyer d'email récapitulatif.";
 		}
-		$referends=$this->db->query("SELECT * FROM admin, admin_formation where id_formation=".$formation->id)->result();
-		
+		$referends=$this->formationManager->getReferends($student->formation);
+	
 		foreach($referends as $admin){
-			$this->sendMessage("nouveau-positionnement-entretiens", $formation, $meeting, $student,$admin);
+			$this->sendMessage($msgAdmin, $formation, $meeting, $student,$admin, null, $skype);
+		}
+	
+		if($fromAdmin){ 
+			$this->session->lastAction="meetingStudent";
+			$this->session->message="Le calendrier a été modifié";
+			redirect("student/casParticulier/".$type."/".$id_student); 
 		}
 		redirect("pages/accueil");
 	}
 
-	private function sendMessage($typeEmail, $formation, $meeting, $student, $admin=null){
+	private function sendMessage($typeEmail, $formation, $meeting, $student, $admin=null, $message=null){
 		// A CHANGER
 		$apiKey="XXXXXXXXXXXXXXXXXX";
 		$mailin = new Mailin('https://api.sendinblue.com/v2.0',$apiKey);
@@ -110,11 +150,10 @@ class Emailing extends CI_Controller{
 			"headers" => array("Content-Type"=> "text/html; charset=iso-8859-1"),
 			
 		);
-
-		return $data;
-		if($mailin->send_email($data)["code"]=="success") return $data; 
 		// A CHANGER
-		 
+		return $data;
+		
+		if($mailin->send_email($data)["code"]=="success") return $data; 
 		return false;
 	}
 }
