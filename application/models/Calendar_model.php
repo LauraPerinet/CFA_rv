@@ -10,28 +10,30 @@ class Calendar_model extends CI_Model{
 		return $this->db->query('SELECT * FROM '.$type.'_calendar WHERE id_'.$type.' ='.$id_student)->result();
 	}
 	public function getOne($type, $id_student, $id_formation){
-		
+
 		return $this->db->query("SELECT * FROM ".$type."_calendar WHERE id_".$type."=".$id_student." AND id_formation=".$id_formation)->row();
 	}
-	
+
 	public function getOneById($type, $id, $oneCol="*"){
 		$col = $oneCol=="*" ? "id, id_".$type." AS id_student, location, skype" : $oneCol;
 		$query="SELECT ".$col." FROM ".$type."_calendar WHERE id=".$id;
+		echo $query;
 		$result=$this->db->query("SELECT ".$col." FROM ".$type."_calendar WHERE id=".$id)->row();
 		return $result ? $oneCol=="*" ? $result : $result->$col : $result;
 	}
-	
+
 	public function deleteCalendar($type, $id){
 		$this->db->query('DELETE FROM '.$type.'_calendar WHERE id='.$id);
 	}
-	
-	public function createCalendar($type, $newDate, $id_formation, $location, $id_student=0){
+
+	public function createCalendar($type, $newDate, $id_formation, $location, $id_student=0, $skype=null){
 		if(!$id_student) $id_student=0;
 		$data=array(
 			"dateRV"=>$newDate->format('Y-m-d H:i:sP'),
 			"id_formation"=>$id_formation,
 			"location"=>$location,
-			"particular"=>$id_student!=0 ? true : false
+			"particular"=>$id_student!=0 ? true : false,
+			"skype"=>$skype!==null ? $skype : 0
 		);
 		$this->db->insert($type."_calendar", $data);
 		return $this->db->insert_id();
@@ -50,5 +52,8 @@ class Calendar_model extends CI_Model{
 	}
 	public function cancelMeeting($type, $id){
 		$this->db->query("UPDATE ".$type."_calendar SET id_".$type."=0, skype=0 WHERE id=".$id);
+	}
+	public function countCalendarStillAvailable($type, $id_formation){
+		return $this->db->query("SELECT COUNT(*) as count from ".$type."_calendar WHERE id_".$type."=0 AND id_formation=".$id_formation)->row()->count;
 	}
 }

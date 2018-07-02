@@ -17,20 +17,21 @@
 
 			<div  class="left">
 				<p>
-					<label for="date" class="inline">Date : </label> <input type="date" name="date" placeholder="jj/mm/dddd" required id="date"/>
+					<label for="date" class="inline">Date : </label> <input type="date" name="date" placeholder="jj/mm/dddd" required />
 			
 					<label for="hourStart" class="inline">De </label><input type="time" name="hourStart" value="09:00" required /> <label for="hourStop" class="inline"> à </label> <input type="time" name="hourStop" value="12:00"/>
 				</p>
 				<p>
 					<label for="location" class="inline">Salle</label>
-					<input name="location">
-				</p>
+					<input name="location" placeholder="Ex : Bâtiment Esclangon - salle 203" class="long"></p>
+				<p><input type="checkbox" name="skype" value="1" /> Skype </p>
+				
 			</div>
 			<div class="left">
 				<p>
 					
 				
-					<input type="hidden" name="formation" value="<?php echo $formation->id_formation; ?>" />
+					<input type="hidden" name="id_formation" value="<?php echo $formation->id_formation; ?>" />
 					<input type="hidden" name="student" value="<?php echo $student->id; ?>" />
 					<input type="hidden" name="particular" value="1" />
 					<input type="hidden" name="type" value="<?php echo $type;?>" />
@@ -59,7 +60,7 @@
 								$class=$meeting["id_student"]==$student->id ? "self" : "notAvailable" ;
 							}
 							?>
-							<li class="meeting <?php echo $class; ?>">
+							<li class="meeting <?php echo $class; echo $meeting["particular"]=="1" ? " particular" :"";?>">
 							
 							<?php echo $meeting['hour']; 
 								if($meeting["id_student"]==="0" || $meeting["id_student"]===$student->id){
@@ -87,7 +88,7 @@
 				
 			} ?>
 		</div>
-		<input type="hidden" name="formation" value="<?php echo $formation->id_formation; ?>"/>
+		<input type="hidden" name="id_formation" value="<?php echo $formation->id_formation; ?>"/>
 		<input type="hidden" name="student" value="<?php echo $student->id; ?>"/>
 		<input type="hidden" name="type" value="<?php echo $type; ?>"/>
 		</form>

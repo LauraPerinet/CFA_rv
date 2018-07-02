@@ -92,11 +92,11 @@ class Import extends CI_Controller{
 					if(!$exist) array_push($newFormation, $student["formation"]);
 				}				
 			}
-			
+			$this->session->students=$students;
 			if(!empty($newFormation)){
 				$this->createFormations($newFormation, $this->input->post('type'));
 			}else{
-				$this->session->students=$students;
+				
 				$this->createStudent($this->input->post('type'));
 			}
 
@@ -107,9 +107,8 @@ class Import extends CI_Controller{
 	}
 	
 	private function createStudent($type){
-		
 		foreach($this->session->students as $student){
-			
+			echo ($student["student"]["name"]);
 			$id=$this->studentManager->getOne($type, "email", '"'.$student["student"]["email"].'"', 'id');
 			
 			if(!(isset($id))){
@@ -117,6 +116,7 @@ class Import extends CI_Controller{
 				
 			}
 
+			
 			$this->createJoin($student["formation"], $id, $type);
 		}
 		if(empty($this->problems)){

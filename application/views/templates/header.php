@@ -18,19 +18,28 @@
 					<li><a href="<?php echo site_url('pages/accueil'); ?>"><img id="logo_cfa" src="https://www.cfa-sciences.fr/sites/upmc/files/CFA%20des%20sciences%20simple_2.png" alt="Accueil" /></a></li>
 				<?php  if(isset($this->session->user)){
 					if($this->session->user->type=="admin"){ ?>
-					<li><a href="<?php echo site_url('student/view'); ?>">Apprentis</a></li>
+					<li><a href="<?php echo site_url('student/view'); ?>">APPRENTIS</a></li>
 					<li>Calendriers
 						<div class="submenu">
 							<ul>
 								<?php foreach($formations as $formation){?>
 									<li class="submenu"><a href="<?php echo site_url('formation/admin/'.$formation->id); ?>"><?php echo $formation->ypareo; ?></a></li>
-									
+
 								<?php }?>
 							</ul>
 						</div>
 					</li>
 					<li>
-						<a href="<?php echo site_url("formation/export"); ?>">Export<a>
+						<a href="<?php echo site_url("formation/export"); ?>">Export</a>
+					</li>
+					<li>
+						Admin
+						<div class="submenu">
+							<ul>
+								<li class="submenu"><a href="<?php echo site_url("admin/formations"); ?>">Formations</a></li>
+								<li class="submenu"><a href="<?php echo site_url("admin/referents"); ?>">Référents</a></li>
+							</ul>
+						</div>
 					</li>
 				<?php }
 				?>
@@ -41,4 +50,3 @@
 	</header>
 	<div class="global">
 	<h1><?php if(isset($title)) echo $title; ?></h1>
-	

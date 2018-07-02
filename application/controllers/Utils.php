@@ -9,6 +9,10 @@ class Utils{
 		$frMonth=$frenchMonth[$d->format('n')-1];
 		return $frDay." ".$d->format('d')." ".$frMonth." ".$d->format('Y');;
 	}
+	public static function getFrenchFormat($day){
+		$d=new DateTime($day);
+		return $d->format('d/m/Y');
+	}
 	public static function getDateMax($day){
 		$date=new DateTime($day);
 		$subDays=3;

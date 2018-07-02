@@ -3,15 +3,15 @@ class Pages extends CI_Controller {
 	public function __construct(){
 		parent::__construct();
 		$this->load->helper('url', 'form');
-		
+
 		$this->load->model('formation_model', 'formationManager');
 		$this->load->model('calendar_model', 'calendarManager');
 		$this->load->model('student_model', 'studentManager');
 		require("Utils.php");
 	}
-	
+
 	public function accueil($page='accueil'){
-		
+
 		if(!isset($this->session->user) && $page!=="contacts") redirect("login/view");
 		if($page=="403"){
 			$directory="errors";
@@ -21,21 +21,22 @@ class Pages extends CI_Controller {
 		if( !file_exists(APPPATH.'views/'.$directory.'/'.$page.'.php')){
 			$directory="errors";
 			$page= $page !== "403" ?"404" : "403";
-		} 
+		}
 		$data=array();
 		if(isset($this->session->user)){
 			if($this->session->user->type!=="admin"){
 				$data=$this->getStudentData();
 			}else{
 				$data=$this->getAdminData();
-			} 
+			}
 		}
+		$data["addressDefault"]=$this->formationManager->getDefaultAddress()[0];
 		$data['title'] = ucfirst($page);
 		$this->load->view('templates/header', $data);
 		$this->load->view($directory.'/'.$page, $data);
 		$this->load->view('templates/footer', $data);
 	}
-	
+
 	private function getStudentData(){
 		$data['student']=$this->session->user;
 		$data['formations'] = $this->formationManager->getAllRelationsForOneStudent($this->session->user->type, $this->session->user->id);
@@ -47,18 +48,18 @@ class Pages extends CI_Controller {
 				$hour=$hour[0].'h'.$hour[1];
 				$formation->meeting->canChange=Utils::canStillChange($date[0]);
 				$formation->meeting->dateRV=$fullDate." à ".$hour;
-				
+
 			}
 		}
 		$data["subtitle"] = count($data['formations'])==1 ? ( $this->session->user->type=="candidate" ? "Votre candidature" : "Votre formation" ) : "Vos candidatures" ;
 		return $data;
 	}
-	
+
 	private function getAdminData(){
 		$type="candidate";
 		$candidate=array(
 			"candidats"=>array(
-				"nb"=>$this->studentManager->countStudent($type), 
+				"nb"=>$this->studentManager->countStudent($type),
 				"class"=>"",
 				"href"=>site_url("student/view/candidate")
 			),
@@ -100,28 +101,28 @@ class Pages extends CI_Controller {
 		);
 		$type="student";
 		$student=array(
-			"apprentis"=>array(
-				"nb"=>$this->studentManager->countStudent($type), 
+			"admis"=>array(
+				"nb"=>$this->studentManager->countStudent($type),
 				"class"=>"",
 				"href"=>site_url("student/view/student")
 			),
 			"inscrits"=>array(
-				"nb"=>$this->formationManager->countStudentsStatus($type, 13,14), 
+				"nb"=>$this->formationManager->countStudentsStatus($type, 13,14),
 				"class"=>"green",
 				"href"=>""
 			),
 			"non inscrits"=>array(
-				"nb"=>$this->formationManager->countStudentsStatus($type, 12), 
+				"nb"=>$this->formationManager->countStudentsStatus($type, 12),
 				"class"=>"orange",
 				"href"=>""
 			),
 			"problèmes"=>array(
-				"nb"=>$this->formationManager->countStudentsStatus($type, 15), 
+				"nb"=>$this->formationManager->countStudentsStatus($type, 15),
 				"class"=>"red",
 				"href"=>""
 			),
 			"soutenances reportées"=>array(
-				"nb"=>$this->formationManager->countStudentsStatus($type, 16), 
+				"nb"=>$this->formationManager->countStudentsStatus($type, 16),
 				"class"=>"red",
 				"href"=>""
 			)
@@ -131,5 +132,5 @@ class Pages extends CI_Controller {
 		$data["students"]["Soutenances"]=$student;
 		return $data;
 	}
-	
+
 }

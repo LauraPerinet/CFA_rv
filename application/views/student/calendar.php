@@ -36,7 +36,6 @@
 									<p class="hiddeOnMob"><?php echo $day." • ".$meeting['hour']; ?></p>
 									<p class="hiddeOnMob">Sorbonne Université, Faculté des Sciences</p>
 									<p class="hiddeOnMob">4, place Jussieu, 75005 Paris</p>
-									<p class="hiddeOnMob">Bâtiment Esclangon</p> 
 									<p ><?php echo $meeting['location']=='' ? "<span class='hiddeOnMob'> La salle sera précisée ultérieurement.</span>": "Salle ".$meeting['location']; ?></p>
 									<button type="submit" value="<?php echo $meeting["id"]; ?>" name="meeting">S'inscrire</button>
 								</div>
@@ -53,7 +52,7 @@
 				
 			} ?>
 		</div>
-		<input type="hidden" name="formation" value="<?php echo $formation; ?>"/>
+		<input type="hidden" name="id_formation" value="<?php echo $formation; ?>"/>
 		</form>
 	<?php }
 ?>

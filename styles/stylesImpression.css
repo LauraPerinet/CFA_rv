@@ -1,26 +1,48 @@
-header, h1, button, footer, .form, form{
+header, h1, button, footer, .form, form, .menuBtn{
 	display:none;
 }
-
-#pageExport{
-	width:15cm;
+html{
+	font-size:10pt;
+}
+.pageExport, .onlyPrint{
+	width:19cm;
 
 }
-#pageExport .formation h2{
+/*
+.pageExport .formation h2, .onlyPrint .formation h2{
 	display:block !important;
-}
+}*/
 
-#pageExport table{
-	margin-top:0;
+.onlyPrint table{
+	margin:0;
+	width:19cm;
 	page-break-inside:avoid;
 	page-break-after:always;
 }
-#pageExport td{
+.pageExport td, .onlyPrint td{
 	height:1cm;
 }
-#pageExport td:first-child{
+.pageExport td:first-child, .onlyPrint td:first-child{
 	width:2cm;
 }
-#pageExport td:last-child{
+.pageExport td:last-child, .onlyPrint td:last-child{
 	width:2cm;
 }
+#tablecandidate form{
+	display:inherit;
+}
+.studentTable td{
+	padding:5px;
+}
+.studentTable td:first-child, .studentTable th:first-child{
+	display:none;
+}
+.studentTable tr tr td:first-child{
+	display:inherit;
+}
+.pageExport{
+	display:none;
+}
+
+
+

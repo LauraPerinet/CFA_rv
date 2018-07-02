@@ -65,7 +65,7 @@
 						<p><span id="numDelete" class="hidden">Des étudiants sont déjà positionnés !</span></p>
 						<div>
 							<input type="hidden" name="type" value="<?php echo $type;?>" />
-							<input type="hidden" name="formation" value="<?php echo $thisForm->id;?>" />
+							<input type="hidden" name="id_formation" value="<?php echo $thisForm->id;?>" />
 							<input type="submit" name="delete" value="Tout à fait certain" />
 							<button type="button" onclick="showPopUp()">Non, surtout pas !</button>
 						</div>
@@ -75,7 +75,7 @@
 			</button> 
 		</div>
 		<div class="form " id="formChangeLocation">
-				<label class="inline">Salle : </label><input name="location">
+				<label class="inline">Salle : </label><input name="location" placeholder="Ex : Bâtiment Esclangon - salle 203" class="long">
 				<input type="submit" name="changeLocation" value="Changer la salle" />
 
 		</div>

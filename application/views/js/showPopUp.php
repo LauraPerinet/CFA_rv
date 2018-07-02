@@ -5,14 +5,14 @@ var deletePopUp=document.getElementById("popupSup");
 var numToDelete=document.getElementById("numDelete");
 
 function showPopUp( id, popUpTab){
-		
+
 		var tab;
 		var problems=0;
 		if(id){
 			if(popUpTab=="meetings"){
 				tab=document.querySelectorAll("input[type=checkbox][name='meeting[]']");
 			}else if(popUpTab=="students"){
-				tab=document.querySelectorAll("input[type=checkbox].<?php echo $title!=='Gestion des apprentis' ? $type :"student"; ?>");
+				tab=document.querySelectorAll("input[type=checkbox].<?php echo $title!=='Gestion des admis' ? $type :"student"; ?>");
 			}
 			var j=0;
 			for(var i=0; i<tab.length; i++){
@@ -30,11 +30,11 @@ function showPopUp( id, popUpTab){
 					}
 				}else{
 					numToDelete.textContent=j;
-				} 
+				}
 			}else{
 				deletePopUp.classList.add("hidden");
 			}
-		
+
 		}
 }
 </script>

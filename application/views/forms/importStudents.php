@@ -1,7 +1,7 @@
 
 <div class="menuBtn hidden"><button  type="button" data-form='formImportStudent'>
-	Importer des apprentis
-	</button> 
+	Importer la liste des admis
+	</button>
 </div>
 <div class="form import" id="formImportStudent">
 <form action="<?php echo site_url('import/importStudent'); ?>" method="post" enctype="multipart/form-data" >
@@ -9,7 +9,7 @@
 		<label for="type">Type </label>
 		<select name="type">
 			<option value="candidate">Candidats - recrutement</option>
-			<option value="student">Apprentis - soutenances</option>
+			<option value="student">Admis - suivi des placements</option>
 		</select>
 	</div>
 	<div>
@@ -18,5 +18,5 @@
 	<div>
 		<input type="submit" value="Importer"/>
 	</div>
-</form> 
+</form>
 </div>

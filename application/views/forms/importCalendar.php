@@ -16,7 +16,7 @@
 		</p>
 		<p>
 			<label for="location" class="inline">Salle</label>
-			<input name="location">
+			<input name="location" placeholder="Ex : Bâtiment Esclangon - salle 203" class="long">
 		</p>
 	</div>
 	<div class="left">

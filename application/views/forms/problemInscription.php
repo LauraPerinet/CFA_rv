@@ -6,7 +6,7 @@
 		</div>
 		<div >
 			<input type="hidden" name="typeEmail" value="ne-peux-pas-venir" />
-			<input type="hidden" name="formation" value="<?php echo $formation; ?>" />
+			<input type="hidden" name="id_formation" value="<?php echo $formation; ?>" />
 			<textarea name="message" placeholder="Votre message" required></textarea>
 		</div>
 

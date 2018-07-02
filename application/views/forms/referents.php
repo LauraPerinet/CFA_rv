@@ -1,4 +1,4 @@
-<h2>Référent_s de la formation</h2>
+<h2>Référents de la formation</h2>
 <ul>
 	<?php foreach($admin as $adm){
 				if(!empty($adm->isRef)) echo '<li>• '.$adm->firstname." ".$adm->name.'<li>'; 
