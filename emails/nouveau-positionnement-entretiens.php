@@ -2,7 +2,7 @@
 $date=explode(" ", $meeting->dateRV);
 $day=Utils::getFullDate($date[0]);
 $subject="Entretien ".$formation->ypareo."| Nouveau positionnement";
-if($meeting->skype!=0) $meeting->location="skype";
+if($meeting->distant!="") $meeting->location=$meeting->distant;
 $alert="";
 if($stillAvailable<=3) $alert="Attention : plus que ".$stillAvailable." sessions de d'entretien libres pour ".$formation->ypareo;
 $message_txt=$alert."\n\n".$formation->ypareo."\n\n".$day." à ".$date[1]."\n\n".$student->name." ".$student->firstname."\n\n".$student->email."\n\n".$student->phone."\n\n";

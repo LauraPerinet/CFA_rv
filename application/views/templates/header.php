@@ -8,6 +8,7 @@
 	</title>
 	<link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet">
 	<link href="<?php echo base_url(); ?>styles/styles.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="https://www.cfa-sciences.fr/sites/upmc/themes/bootstrap_upmc/favicon.ico" type="image/vnd.microsoft.icon" />
 	<?php if(isset($imprime) && $imprime){ ?> <link href="<?php echo base_url(); ?>styles/stylesImpression.css" type="text/css" rel="stylesheet" media="print"/><?php } ?>
 </head>
 <body>

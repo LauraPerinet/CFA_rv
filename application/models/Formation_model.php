@@ -17,34 +17,34 @@ class Formation_model extends CI_Model{
 	}
 	public function getAllRelationsForOneStudent($type, $id_student){
 		return $this->db->query(
-			'SELECT * FROM '.$type.'_formation 
-			INNER JOIN formation ON '.$type.'_formation.id_formation=formation.id 
+			'SELECT * FROM '.$type.'_formation
+			INNER JOIN formation ON '.$type.'_formation.id_formation=formation.id
 			WHERE id_'.$type.'='.$id_student
 		)->result();
 	}
-	
+
 	public function countAllRelations($type, $id_formation=null){
 		$this->db->select("*");
 		$this->db->from($type.'_formation');
 		if($id_formation) $this->db->where('id_formation', $id_formation);
 		return $this->db->count_all_results();
 	}
-	
+
 	public function countStudentsStatus($type, $id_status, $id_status2=null, $id_formation=null){
 		if($id_status2){
-			$query="SELECT COUNT(*) FROM ".$type."_formation WHERE ( id_status=".$id_status." OR id_status=".$id_status2.")"; 
+			$query="SELECT COUNT(*) FROM ".$type."_formation WHERE ( id_status=".$id_status." OR id_status=".$id_status2.")";
 		}else{
 			$query="SELECT COUNT(*) FROM ".$type."_formation WHERE id_status=".$id_status;
 		}
-		
+
 		if($id_formation)$query.=" AND id_formation=".$id_formation;
 		return $this->db->query($query)->row_array()["COUNT(*)"];
 	}
-	
+
 	public function getOneRelation($type, $id_student, $id_formation){
 		return $this->db->query('SELECT * FROM '.$type.'_formation WHERE id_'.$type.'='.$id_student.' AND id_formation='.$id_formation)->row();
 	}
-	
+
 	public function createNewRelation($type, $id_student, $id_formation, $id_status){
 		$data=array(
 				'id_'.$type=>$id_student,
@@ -54,7 +54,7 @@ class Formation_model extends CI_Model{
 		);
 		$this->db->insert($type.'_formation', $data);
 	}
-	
+
 	public function updateStatus($type, $id_student, $id_formation, $new_status){
 		$query="UPDATE ".$type."_formation SET id_status=".$new_status.", relance=0,lastModif='".date("Y-m-d")."' WHERE id_".$type."=".$id_student." AND id_formation=".$id_formation;
 		$this->db->query($query);
@@ -85,15 +85,15 @@ class Formation_model extends CI_Model{
 	public function deleteFormation($id_formation){
 		$candidate=$this->db->query("SELECT id_candidate FROM candidate_formation WHERE id_candidate!=0 AND id_formation=".$id_formation)->result();
 		$students=$this->db->query("SELECT id_student FROM student_formation WHERE id_student!=0 AND id_formation=".$id_formation)->result();
-		
-		
+
+
 		$this->db->query('DELETE FROM student_calendar WHERE id_formation='.$id_formation);
 		$this->db->query('DELETE FROM candidate_calendar WHERE id_formation='.$id_formation);
 		$this->db->query('DELETE FROM student_formation WHERE id_formation='.$id_formation);
 		$this->db->query('DELETE FROM candidate_formation WHERE id_formation='.$id_formation);
 		$this->db->query('DELETE FROM formation WHERE id='.$id_formation);
-		
-		
+
+
 		foreach($candidate as $student){
 			if(count($this->getAllRelationsForOneStudent("candidate", $student->id_candidate))==0){
 				$this->db->query('DELETE FROM candidate WHERE id='.$student->id_candidate);
@@ -111,7 +111,7 @@ class Formation_model extends CI_Model{
 		return $this->db->query($query)->result();
 	}
 	public function getReferends($id_formation){
-		$ref=$this->db->query("SELECT * FROM admin, admin_formation where id_formation=".$id_formation)->result();
+		$ref=$this->db->query("SELECT * FROM admin, admin_formation where id_formation=".$id_formation." AND admin.id=admin_formation.id_admin")->result();
 		if(count($ref)==0) $ref=$this->getDefaultAddress();
 
 		return $ref;
@@ -120,7 +120,7 @@ class Formation_model extends CI_Model{
 		$ref=$this->db->query("SELECT * FROM admin where DefaultRef=1")->result();
 		return $ref;
 	}
-	
+
 	public function deleteReferend($id_formation){
 
 		$this->db->query("DELETE FROM admin_formation WHERE id_formation=".$id_formation);
@@ -142,25 +142,8 @@ class Formation_model extends CI_Model{
 		}
 		return $admins;
 	}
-	
-	
-	
-	
+
+
+
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,6 +1,7 @@
 <script>
-	
+
 	//scriptCalendar
+	var rooms=document.getElementsByClassName("loc");
 	var selectAll=document.getElementsByClassName("selectAll");
 	var meetings=document.getElementsByClassName("meeting");
 	//var hidden="true";
@@ -8,18 +9,32 @@
 	var CalendartoHide=document.getElementById("CalendartoHide");
 	//var deletePopUp=document.getElementById("popupSup");
 	//var numToDelete=document.getElementById("numDelete");
-	
+
 	for(var i=0; i<selectAll.length; i++){
 		selectAll[i].addEventListener("click", selectionCalendar);
 	}
 
 	CalendartoHide.classList.add("hidden");
-	
+
 	for(var i=0; i<meetings.length; i++){
 		meetings[i].addEventListener("click", selectOne);
 	}
-	
-	
+
+  document.getElementById("roomsBtn").addEventListener("click",
+		function(){
+			for(var i=0; i<rooms.length;i++){
+				if(rooms[i].classList.contains("clear")){
+					rooms[i].classList.remove("clear");
+					rooms[i].classList.add("hidden");
+					document.getElementById("roomsBtn").textContent="Montrer les salles";
+				}else{
+					rooms[i].classList.remove("hidden");
+					rooms[i].classList.add("clear");
+					document.getElementById("roomsBtn").textContent="Cacher les salles";
+				}
+			}
+		});
+
 	function selectionCalendar(e){
 		var allMeetings = document.querySelectorAll("input[type=checkbox]."+e.target.getAttribute("data-day"));
 		for(var i=0; i<allMeetings.length; i++){
@@ -34,13 +49,13 @@
 		checkedCalendar= e.target.checked ? allMeetings.length : 0;
 		hideCalendarChange()
 	}
-	
-	
+
+
 	function selectOne(e){
 		var liNodes=e.target.childNodes;
 		var i=0;
 		while(liNodes[i].nodeName==="#text"){ i++;}
-		
+
 		liNodes[i].checked=!liNodes[i].checked;
 		if(liNodes[i].checked){
 			e.target.classList.add("selected");
@@ -58,7 +73,7 @@
 			CalendartoHide.classList.remove("hidden");
 		}
 	}
-	
+
 	document.querySelector("input[name='delete']").addEventListener("keypress", function(e){if(e.keyCode==13) e.target.preventDefault();});
-	
+
 </script>

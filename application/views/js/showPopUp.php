@@ -12,7 +12,7 @@ function showPopUp( id, popUpTab){
 			if(popUpTab=="meetings"){
 				tab=document.querySelectorAll("input[type=checkbox][name='meeting[]']");
 			}else if(popUpTab=="students"){
-				tab=document.querySelectorAll("input[type=checkbox].<?php echo $title!=='Gestion des admis' ? $type :"student"; ?>");
+				tab=document.querySelectorAll("input[type=checkbox].<?php echo $title!=='Gestion des apprentis' ? $type :"student"; ?>");
 			}
 			var j=0;
 			for(var i=0; i<tab.length; i++){

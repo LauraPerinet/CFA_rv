@@ -114,7 +114,7 @@ class Formation extends CI_Controller{
 			}
 			while($d<$dmax && $i<100){
 
-				$id=$this->calendarManager->createCalendar($type, $d, $id_formation, $this->input->post('location'), $this->input->post("student"), $this->input->post("skype"));
+				$id=$this->calendarManager->createCalendar($type, $d, $id_formation, $this->input->post('location'), $this->input->post("student"), $this->input->post("distant"));
 				$d->add(new DateInterval('PT'.$step.'M'));
 				$i++;
 			}
@@ -186,7 +186,7 @@ class Formation extends CI_Controller{
 				$fullDate=Utils::getFullDate($day);
 				$meetings[$fullDate]=array();
 			}
-			array_push($meetings[$fullDate], array("id"=>$calendar->id,"hour"=>substr($date[1], 0, 5), "id_student"=> $type=="student" ? $calendar->id_student : $calendar->id_candidate, "location"=>$calendar->location, "skype"=>$calendar->skype, "particular"=>$calendar->particular ));
+			array_push($meetings[$fullDate], array("id"=>$calendar->id,"hour"=>substr($date[1], 0, 5), "id_student"=> $type=="student" ? $calendar->id_student : $calendar->id_candidate, "location"=>$calendar->location, "distant"=>$calendar->distant, "particular"=>$calendar->particular ));
 		}
 		return $meetings;
 	}
@@ -213,11 +213,11 @@ class Formation extends CI_Controller{
 			}
 
 
-			//$student=$this->studentManager->getOne($type, "id", $this->input->post('student'));
+			$student=$this->studentManager->getOne($type, "id", $this->input->post('student'));
 			$this->formationManager->updateStatus($type, $this->input->post('student'), $this->input->post('id_formation'), 7);
 			redirect("emailing/sendEmailAuto/".$type."/".$this->input->post('student')."/".$this->input->post('id_formation')."/1/1");
 
-			//redirect("student/casParticulier/".$type."/".$this->input->post('student'));
+			redirect("student/casParticulier/".$type."/".$this->input->post('student'));
 		}
 	}
 	public function checkInscription($fromAdmin=0, $id_meeting=null){
@@ -237,13 +237,16 @@ class Formation extends CI_Controller{
 			$type=$student->type;
 			$redirect="emailing/sendEmailAuto";
 		}
+
 		$meeting=$this->calendarManager->getOneById($type, $id_meeting);
+
 		if($meeting->id_student == 0 || $meeting->id_student == $student->id){
-			$skype= $this->input->post("skype")!==null ? $this->input->post("skype") : 0;
-			$this->calendarManager->updateStudent($type, $id_meeting, $student->id, $this->input->post('id_formation'), $skype);
+
+			$distant= $this->input->post("distant")!=="" ? $this->input->post("distant") : "";
+			$this->calendarManager->updateStudent($type, $id_meeting, $student->id, $this->input->post('id_formation'), $distant);
 			if($this->calendarManager->getOneById($type, $id_meeting)->id_student==$student->id){
 				$new_status=3;
-				if($meeting->location==="" && $skype!=1) $new_status=4;
+				if($meeting->location==="" && $distant!="") $new_status=4;
 				$this->formationManager->updateStatus($type, $student->id, $this->input->post('id_formation'), $new_status);
 				$student->message="Merci de votre inscription. Vous allez recevoir un email récapitulatif.";
 				$this->session->user->formation=$this->input->post("id_formation");
@@ -324,7 +327,7 @@ class Formation extends CI_Controller{
 
 		// send the column headers
 		fputcsv($file, array("\xEF\xBB\xBF"),";");
-		fputcsv($file, array('Formation', 'Date de l\'entretien', 'Heure', 'Salle', 'Nom du candidat', 'Prénom du candidat', 'Email du candidat', 'Telephone du candidat', 'Skype'),";");
+		fputcsv($file, array('Formation', 'Date de l\'entretien', 'Heure', 'Salle', 'Nom du candidat', 'Prénom du candidat', 'Email du candidat', 'Telephone du candidat', 'Distant'),";");
 
 		// Sample data. This can be fetched from mysql too
 		$data = array();
@@ -342,7 +345,7 @@ class Formation extends CI_Controller{
 						$email=$meeting["student"]->email;
 						$phone=$meeting["student"]->phone;
 					}
-					$row=array($formation, $day, $meeting["hour"], $meeting["location"], $name, $firstname, $email, $phone, $meeting["skype"]==0?"":"OUI");
+					$row=array($formation, $day, $meeting["hour"], $meeting["location"], $name, $firstname, $email, $phone, $meeting["distant"]==""?"":"OUI");
 
 					array_push($data, $row);
 				}

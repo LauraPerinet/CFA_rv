@@ -198,7 +198,7 @@ textarea{
 }
 input.long{
 	min-width:300px;
-	
+
 }
 input[type="submit"], button, .btn{
 	background: #0063A1;
@@ -225,7 +225,7 @@ input.realDelete{
 input[type="submit"]:hover, button:hover, .btn:hover{
 	color:#0063A1;
 	background-color:white;
-	
+
 }
 input.realDelete:hover{
 	background-color:#fff;
@@ -247,7 +247,7 @@ input.realDelete:hover{
 
 .menuBtn button{
 	background:none;
-	color:#0063A1;
+	color:#afcadb;
 	border:none;
 	text-align:left;
 	padding-left:0;
@@ -324,7 +324,7 @@ input.realDelete:hover{
 /*------------------------------ CALENDAR */
 #calendars {
 	display:flex;
-	
+
 }
 .dayBox{
 	background-color:#e7e7e7;
@@ -345,6 +345,9 @@ input.realDelete:hover{
 }
 .particular{
 	background-color:#edcc74;
+}
+.particular.available{
+	background-color: #ffebba;
 }
 .clear{
 	clear:both;
@@ -490,7 +493,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063A1', end
 	width:100%;
 	border-collapse:collapse;
 	margin-top:20px;
-	
+
 }
 .pageExport td, #onlyPrint td{
 	padding:5px;
@@ -533,7 +536,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063A1', end
 }
 .onlyPrint .large{
 	min-width:27%;
-	
+
 }
 .onlyPrint .horaire{
 	text-align:center;
@@ -574,7 +577,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063A1', end
 .student a:not(.btn){
 	font-weight:bold;
 	color:#0063A1;
-	
+
 }
 .student a:not(.btn):hover{
 	color:#555;
@@ -604,7 +607,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063A1', end
 
 #onlyPrint img{
 	width:3cm;
-	
+
 }
 
 
@@ -635,7 +638,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063A1', end
 	header nav>ul>li:not(:first-child):after{
 		margin-left:0;
 	}
-	
+
 	.dayBox{
 		margin:20px 0;
 		max-width:100%;
@@ -650,19 +653,19 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063A1', end
 	.meeting span:not(.hiddeOnMob), .meeting div{
 		display:inline-block;
 		border:none;
-		
+
 		text-align:center;
 		box-shadow:none;
 	}
 	.meeting span:not(.hiddeOnMob){
 		width:20%;
-		
+
 	}
 	.infobloc{
 		width:80%;
 		padding:0;
 	}
-	
+
 	#calendars.student .meeting .infobloc *{
 		opacity:1;
 		margin-top:0;
@@ -675,43 +678,3 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063A1', end
 		max-width:100%;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

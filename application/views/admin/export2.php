@@ -8,9 +8,9 @@
 		</select>
 		<div><input type="submit" value="Exporter les tableaux"/>	</div>
 	</div>
-	
+
 	<div>
-	<?php 
+	<?php
 	$i=0;
 	$j=count($formations)*0.5;
 	foreach($formations as $formation){
@@ -21,15 +21,15 @@
 		?>
 			<li class="submenu">
 
-				<input type="checkbox" name="id_formation[]" value="<?php echo $formation->id;?>"/> 
+				<input type="checkbox" name="id_formation[]" value="<?php echo $formation->id;?>"/>
 				<?php echo $formation->ypareo; ?>
 			</li>
-	<?php 
+	<?php
 		$i++;
 	}?>
-		
+
 	</div>
-		
+
 	</form>
 </div>
 <div id="pageExport">
@@ -44,27 +44,27 @@
 			<button type="submit">Exporter en csv</a>
 		</form>
 	</div>
-	
-<?php  
+
+<?php
 
 foreach($meetings as $formation=>$days){ ?>
-	<div class="formation"> 
+	<div class="formation">
 		<h2><?php echo $formation;?></h2>
-	<?php 
+	<?php
 		if(empty($days)){ ?>
 			<p>Pas de calendrier enregistré</p>
 		<?php }
 		$meeting;
-		foreach($days as $day=>$sessions){?> 
-		
-		
+		foreach($days as $day=>$sessions){?>
+
+
 		<table>
 			<tr>
 				<td ><img src="https://www.cfa-sciences.fr/sites/upmc/files/CFA%20des%20sciences%20simple_2.png"></td>
 				<td colspan="5"><h2><?php echo $formation;?></h2></td>
 				<td><img src="https://www.cfa-sciences.fr/sites/upmc/files/styles/logo_part/public/thumbnails/image/SORBONNE_FAC_SCIENCES_DEF_RVB_0.png?itok=7tgOZy4L"></td>
 			</tr>
-			
+
 			<tr>
 				<td colspan="7">
 					<?php echo $day;?>
@@ -84,9 +84,9 @@ foreach($meetings as $formation=>$days){ ?>
 			</tr>
 			<?php foreach($sessions as $meeting){ ?>
 			<tr>
-				<td><?php echo $meeting["skype"]==1 ? "Skype" : $meeting["location"];?></td>
+				<td><?php echo $meeting["distant"]!="" ? $meeting["distant"] : $meeting["location"];?></td>
 				<td><?php echo $meeting['hour'];?></td>
-				<td><?php if(isset($meeting['student'])){ ?> 
+				<td><?php if(isset($meeting['student'])){ ?>
 					<p><?php echo $meeting['student']->name." ".$meeting['student']->firstname; ?></p>
 					<p><?php echo $meeting['student']->email; ?> • <?php echo $meeting['student']->phone; ?></p>
 				<?php }?></td>
@@ -94,9 +94,9 @@ foreach($meetings as $formation=>$days){ ?>
 				<td></td>
 				<td></td>
 				<td></td>
-				
+
 			</tr>
-			
+
 			<?php }?>
 			<tr>
 				<td colspan="7">
@@ -104,7 +104,7 @@ foreach($meetings as $formation=>$days){ ?>
 				</td>
 			</tr>
 			</table>
-			
+
 		<?php }?>
 	</div>
 <?php }}

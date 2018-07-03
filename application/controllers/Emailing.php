@@ -129,18 +129,18 @@ class Emailing extends CI_Controller{
 			$msgAdmin="annulation";
 			$msgStudent="annulationStudent";
 			$meeting=null;
-			$skype= null;
+			$distant= "";
 		}else{
 			$msgAdmin="nouveau-positionnement-entretiens";
 			$msgStudent="confirmation-entretien";
 
 			$meeting=$this->calendarManager->getOne($student->type, $student->id, $student->formation);
-			$skype= $meeting->skype==0 ? false : true;
+			$distant= $meeting->distant=="" ? false : true;
 		}
 		$formation=$this->formationManager->getOne("id", $student->formation);
 
 
-		if($email=$this->sendMessage($msgStudent, $formation, $meeting, $student, null,null, $skype)){
+		if($email=$this->sendMessage($msgStudent, $formation, $meeting, $student, null,null, $distant)){
 			$student->message="Merci pour votre positionnement. Vous recevrez sous peu un courriel récapitulatif.";
 		}else{
 			$student->message="Nous n'avons pas pu vous envoyer d'email récapitulatif.";
@@ -148,7 +148,7 @@ class Emailing extends CI_Controller{
 		$referends=$this->formationManager->getReferends($student->formation);
 
 		foreach($referends as $admin){
-			$this->sendMessage($msgAdmin, $formation, $meeting, $student,$admin, null, $skype);
+			$this->sendMessage($msgAdmin, $formation, $meeting, $student,$admin, null, $distant);
 		}
 
 		if($fromAdmin){

@@ -97,7 +97,7 @@ class Student extends CI_Controller{
 			$student->type=$data["query"]["type"];
 			$student->formations = $this->studentManager->getStudentFormations($student->type, $student->id, $data["query"]["status"], $id_status2, $data["query"]["between"], $data["query"]["relance"]);
 		}
-		$data['title']="Gestion des admis";
+		$data['title']="Gestion des apprentis";
 		$data['formations']=$this->formationManager->getAll();
 		$data['olderModif']=$this->studentManager->getOlderModif($data['query']['type']);
 
@@ -126,7 +126,7 @@ class Student extends CI_Controller{
 				$fullDate=Utils::getFullDate($day);
 				$meetings[$fullDate]=array();
 			}
-			array_push($meetings[$fullDate], array("id"=>$calendar->id,"hour"=>substr($date[1], 0, 5), "id_student"=> $type=="student" ? $calendar->id_student : $calendar->id_candidate, "location"=>$calendar->location, "skype"=>$calendar->skype, "particular"=>$calendar->particular ));
+			array_push($meetings[$fullDate], array("id"=>$calendar->id,"hour"=>substr($date[1], 0, 5), "id_student"=> $type=="student" ? $calendar->id_student : $calendar->id_candidate, "location"=>$calendar->location, "distant"=>$calendar->distant, "particular"=>$calendar->particular ));
 		}
 		return $meetings;
 	}
