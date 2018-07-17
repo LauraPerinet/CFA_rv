@@ -9,6 +9,7 @@ class Emailing extends CI_Controller{
 		$this->load->model('formation_model', 'formationManager');
 		$this->load->model('student_model', 'studentManager');
 		$this->load->model('calendar_model', 'calendarManager');
+		$this->load->model('annonce_model', 'annonceManager');
 		require('Mailin_SENDINBLUE.php');
 		require('Utils.php');
 	}
@@ -117,6 +118,18 @@ class Emailing extends CI_Controller{
 
 	}
 
+	public function sendEmailAnnonce($id_annonce, $id_formation, $id_student=null){
+		if($id_student!==null){
+				$this->sendMessage("new_annonce", null, null, $this->studentManager->getOne("student", "id",$id_student), null, null, $this->annonceManager->getOne($id_annonce));
+		}else{
+			foreach ($this->studentManager->getStudentByAnnonce($id_annonce) as $student) {
+				$this->sendMessage("new_annonce", null, null, $student, null, null, $this->annonceManager->getOne($id_annonce));
+			}
+		}
+		
+		redirect("formation/admin/$id_formation/student");
+	}
+
 	public function sendEmailAuto($type=null, $id_student=null, $id_formation=null, $fromAdmin=false, $cancel=false){
 		if($type && $id_student && $id_formation){
 			$student=$this->studentManager->getOne($type, "id", $id_student);
@@ -159,7 +172,7 @@ class Emailing extends CI_Controller{
 		redirect("pages/accueil");
 	}
 
-	private function sendMessage($typeEmail, $formation, $meeting, $student, $admin=null, $message=null){
+	private function sendMessage($typeEmail, $formation, $meeting, $student, $admin=null, $message=null, $annonce=null){
 		// A CHANGER
 		$apiKey="XXXXXXXXXXXXXXXXXX";
 		$mailin = new Mailin('https://api.sendinblue.com/v2.0',$apiKey);

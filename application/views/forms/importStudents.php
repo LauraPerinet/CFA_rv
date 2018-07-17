@@ -1,6 +1,6 @@
 
 <div class="menuBtn hidden"><button  type="button" data-form='formImportStudent'>
-	Importer la liste des admis
+	Importer des apprentis
 	</button>
 </div>
 <div class="form import" id="formImportStudent">

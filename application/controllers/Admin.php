@@ -1,4 +1,4 @@
-<?php 
+<?php
 class Admin extends CI_controller{
 	public function __construct(){
 		parent::__construct();
@@ -8,11 +8,11 @@ class Admin extends CI_controller{
 		$this->load->model('student_model', 'userManager');
 		$this->load->model('calendar_model', 'calendarManager');
 	}
-	
+
 	public function formations(){
 		$data['formations']=$this->formationManager->getAll();
 		$data['title']="Modifier ou supprimer les formations";
-		
+
 		$this->load->view('templates/header', $data);
 		if(isset($this->session->lastAction) && $this->session->lastAction=="updateFormation"){
 			$this->load->view('templates/msgSent');
@@ -30,7 +30,7 @@ class Admin extends CI_controller{
 		$data['formations']=$this->formationManager->getAll();
 		$data['referents']=$this->formationManager->getAdmins();
 		$data['title']="Gestion des utilisateurs référents";
-		
+
 		$this->load->view('templates/header', $data);
 		if(isset($this->session->lastAction) && $this->session->lastAction=="updateAdmin"){
 			$this->load->view('templates/msgSent');
@@ -38,8 +38,8 @@ class Admin extends CI_controller{
 		$this->load->view('forms/adminManager', $data);
 		$this->load->view('templates/footer', $data);
 	}
-	
-	
+
+
 	public function modificationFormation($id_formation=null, $areYouSure=false){
 		if(!$id_formation) redirect("admin/formations");
 		if($this->input->post("modification")){
@@ -49,7 +49,7 @@ class Admin extends CI_controller{
 		}
 		if($this->input->post("erase") || $areYouSure){
 			$data=$this->formationManager->testDeleteFormation($id_formation);
-			if($areYouSure || $data["total"]==0 ){ 
+			if($areYouSure || $data["total"]==0 ){
 				$this->formationManager->deleteFormation($id_formation);
 				$this->session->message="La formation a été supprimée.";
 				$this->session->lastAction="updateFormation";
@@ -59,17 +59,18 @@ class Admin extends CI_controller{
 				$this->suppressionFormation($data);
 			}
 		}
-		redirect("admin/formations");
-		
+		$this->formations();
+		//redirect("admin/formations");
+
 	}
-	
+
 	public function deleteAdmin(){
 		$this->userManager->deleteAdmin($this->input->post("admin"));
 		$this->session->message="L'administrateur a été supprimé.";
 		$this->session->lastAction="updateAdmin";
 		redirect("admin/referents");
 	}
-	
+
 	public function ajoutAdmin(){
 		$domain=substr($this->input->post("email"), strpos($this->input->post("email"), "@"));
 		if( $domain==="@cfa-sciences.fr" || $domain ==="@cci-paris-idf.fr"){
@@ -84,32 +85,32 @@ class Admin extends CI_controller{
 		}else{
 			$this->session->message="L'administrateur n'a pas pu être créé. Il doit avoir une adresse courriel cfa-sciences.fr ou cci-paris-idf.fr.";
 		}
-		
+
 		$this->session->lastAction="updateAdmin";
 		redirect("admin/referents");
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

@@ -1,5 +1,5 @@
 
-<?php 
+<?php
 	foreach($formations as $formation){?>
 		<form action='modificationFormation/<?php echo $formation->id;?>' method="post" />
 		<div>
@@ -12,6 +12,3 @@
 		</form>
 	<?php }
 ?>
-
-
-Super@dmin@CFA_RV

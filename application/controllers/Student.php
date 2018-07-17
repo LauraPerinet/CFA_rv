@@ -65,7 +65,7 @@ class Student extends CI_Controller{
 		};
 		$this->session->lastAction="deleteStudent";
 		$this->session->message="Les étudiants ont bien été supprimés";
-		redirect("student/view");
+		redirect("student/view/".$this->input->post('type'));
 	}
 
 	public function update($id_student){
@@ -129,6 +129,11 @@ class Student extends CI_Controller{
 			array_push($meetings[$fullDate], array("id"=>$calendar->id,"hour"=>substr($date[1], 0, 5), "id_student"=> $type=="student" ? $calendar->id_student : $calendar->id_candidate, "location"=>$calendar->location, "distant"=>$calendar->distant, "particular"=>$calendar->particular ));
 		}
 		return $meetings;
+	}
+	public function updateStatus($id_formation, $id_status, $id_student){
+		$new_status=$id_status=="10" ? 11:10;
+		$this->formationManager->updateStatus("student", $id_student, $id_formation, $new_status);
+		//redirect("student/view/student");
 	}
 	private function exportCSV($titleCSV, $students, $query){
 		header('Content-type: text/csv;charset=UTF-8');

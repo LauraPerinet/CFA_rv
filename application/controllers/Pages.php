@@ -7,51 +7,73 @@ class Pages extends CI_Controller {
 		$this->load->model('formation_model', 'formationManager');
 		$this->load->model('calendar_model', 'calendarManager');
 		$this->load->model('student_model', 'studentManager');
+		$this->load->model('annonce_model', 'annonceManager');
 		require("Utils.php");
 	}
 
 	public function accueil($page='accueil'){
-
-		if(!isset($this->session->user) && $page!=="contacts") redirect("login/view");
-		if($page=="403"){
-			$directory="errors";
-		}else{
-			$directory=isset($this->session->user) ?  $this->session->user->folder : "student";
-		}
-		if( !file_exists(APPPATH.'views/'.$directory.'/'.$page.'.php')){
-			$directory="errors";
-			$page= $page !== "403" ?"404" : "403";
-		}
-		$data=array();
-		if(isset($this->session->user)){
-			if($this->session->user->type!=="admin"){
-				$data=$this->getStudentData();
-			}else{
-				$data=$this->getAdminData();
-			}
-		}
-		$data["addressDefault"]=$this->formationManager->getDefaultAddress()[0];
 		$data['title'] = ucfirst($page);
-		$this->load->view('templates/header', $data);
-		$this->load->view($directory.'/'.$page, $data);
-		$this->load->view('templates/footer', $data);
+		if($this->session->user->type=="student" && $page!=="contacts"){
+			$page="listAnnonces";
+			}
+			if(!isset($this->session->user) && $page!=="contacts") redirect("login/view");
+			if($page=="403"){
+				$directory="errors";
+			}else{
+				$directory=isset($this->session->user) ?  $this->session->user->folder : "student";
+			}
+			if( !file_exists(APPPATH.'views/'.$directory.'/'.$page.'.php')){
+				$directory="errors";
+				$page= $page !== "403" ?"404" : "403";
+			}
+
+			$data=array();
+			if(isset($this->session->user)){
+				if($this->session->user->type!=="admin"){
+					$data=$this->getStudentData($this->session->user->type);
+				}else{
+					$data=$this->getAdminData();
+				}
+			}
+			$data["addressDefault"]=$this->formationManager->getDefaultAddress()[0];
+
+			$this->load->view('templates/header', $data);
+			$this->load->view($directory.'/'.$page, $data);
+
+			if($this->session->user->type==="student") 	$this->load->view('js/openMenu', $data);
+			$this->load->view('templates/footer', $data);
+
 	}
 
-	private function getStudentData(){
+	private function getStudentData($type){
 		$data['student']=$this->session->user;
 		$data['formations'] = $this->formationManager->getAllRelationsForOneStudent($this->session->user->type, $this->session->user->id);
-		foreach($data['formations'] as $formation){
-			if($formation->meeting = $this->calendarManager->getOne($this->session->user->type, $this->session->user->id, $formation->id)){
-				$date=explode(" ", $formation->meeting->dateRV);
-				$fullDate=Utils::getFullDate($date[0]);
-				$hour=explode(':',$date[1]);
-				$hour=$hour[0].'h'.$hour[1];
-				$formation->meeting->canChange=Utils::canStillChange($date[0]);
-				$formation->meeting->dateRV=$fullDate." à ".$hour;
+		if($type=="candidate"){
 
+			foreach($data['formations'] as $formation){
+				if($formation->meeting = $this->calendarManager->getOne($this->session->user->type, $this->session->user->id, $formation->id)){
+					$date=explode(" ", $formation->meeting->dateRV);
+					$fullDate=Utils::getFullDate($date[0]);
+					$hour=explode(':',$date[1]);
+					$hour=$hour[0].'h'.$hour[1];
+					$formation->meeting->canChange=Utils::canStillChange($date[0]);
+					$formation->meeting->dateRV=$fullDate." à ".$hour;
+
+				}
 			}
+			$data["subtitle"] = count($data['formations'])==1 ? ( $this->session->user->type=="candidate" ? "Votre candidature" : "Votre formation" ) : "Vos candidatures" ;
+		}else{
+			$data["subtitle"]="Offres d'emplois de nos entreprises partenaires";
+			$data["annonces"]=$this->annonceManager->getAllByFormationWidthStudents($data['formations'][0]->id, false);
+			foreach($data["annonces"] as $type){
+				foreach($type as $annonce){
+				$annonce->response=$this->annonceManager->getResponsesByCandidate($annonce->id, $this->session->user->id);
+				}
+			}
+
+
 		}
-		$data["subtitle"] = count($data['formations'])==1 ? ( $this->session->user->type=="candidate" ? "Votre candidature" : "Votre formation" ) : "Vos candidatures" ;
+
 		return $data;
 	}
 
@@ -129,7 +151,7 @@ class Pages extends CI_Controller {
 		);
 		$data["formations"] = $this->formationManager->getAll();
 		$data["students"]["Entretiens de selection"]=$candidate;
-		$data["students"]["Soutenances"]=$student;
+		$data["students"]["Annonces placement"]=$student;
 		return $data;
 	}
 

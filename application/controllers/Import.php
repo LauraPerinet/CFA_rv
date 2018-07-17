@@ -1,6 +1,6 @@
 <?php
 class Import extends CI_Controller{
-	
+
 	private $template=[
 				"PORTABLE_COURRIER"=>"",
                 "NOM_FORMATION_SOUHAITE"=>"",
@@ -9,7 +9,7 @@ class Import extends CI_Controller{
                 "EMAIL_COURRIER"=>""
         ];
 	private $problems;
-	
+
 	public function __construct(){
 		parent::__construct();
 		$this->load->helper('url');
@@ -25,12 +25,12 @@ class Import extends CI_Controller{
 		$data['problems']=$this->problems;
 		$data['title']="L'importation ne s'est pas bien passé...";
 		$data["formations"] = $this->formationManager->getAll();
-		
+
 		$this->load->view('templates/header', $data);
 		$this->load->view('admin/problems_import', $data);
 		$this->load->view('forms/importStudents', $data);
 		$this->load->view('templates/footer', $data);
-		
+
 	}
 	public function createFormations($newFormation=null, $type=null){
 		$data["newFormation"]=$newFormation;
@@ -38,7 +38,7 @@ class Import extends CI_Controller{
 		$data["type"]=$type;
 		$this->load->helper('form');
 		$this->load->view('templates/header', $data);
-		
+
 		if($newFormation===null){
 			$ypareo=$this->input->post("ypareo");
 			for($i=0; $i<count($ypareo); $i++){
@@ -70,80 +70,91 @@ class Import extends CI_Controller{
 							"password"=>$this->createPassword()
 							),
 						"formation"=>$lign[$this->template["NOM_FORMATION_SOUHAITE"]]
-					
+
 				);
 					array_push($students, $studentLign);
-					
+
 				}
 				$row++;
 			}
 			fclose($file);
-			
+
 			$newFormation=array();
 			foreach($students as $student){
 				if(!$this->formationManager->getOne("ypareo", '"'.$student["formation"].'"')){
 					$exist=false;
-					for($i=0; $i<count($newFormation); $i++){ 
+					for($i=0; $i<count($newFormation); $i++){
 						if($newFormation[$i] == $student["formation"]){
-							$exist=true; 
+							$exist=true;
 							break;
 						}
 					}
 					if(!$exist) array_push($newFormation, $student["formation"]);
-				}				
+				}
 			}
 			$this->session->students=$students;
 			if(!empty($newFormation)){
 				$this->createFormations($newFormation, $this->input->post('type'));
 			}else{
-				
+
 				$this->createStudent($this->input->post('type'));
 			}
 
 		}else{
 			$this->problems .= "<br/>Le fichier n'a pas pu être importé.";
         }
-		
+
 	}
-	
+
 	private function createStudent($type){
 		foreach($this->session->students as $student){
-			echo ($student["student"]["name"]);
 			$id=$this->studentManager->getOne($type, "email", '"'.$student["student"]["email"].'"', 'id');
-			
+
 			if(!(isset($id))){
+				if($type=="student"){
+					$oldCandidate=$this->studentManager->getOne("candidate", "email", '"'.$student["student"]["email"].'"');
+					$this->studentManager->deleteStudent("candidate", $oldCandidate->id);
+					if($oldCandidate!==null) $student["student"]["password"]=$oldCandidate->password;
+				}
 				$id=$this->studentManager->createNewStudent($type, $student["student"]);
-				
+
 			}
 
-			
+
 			$this->createJoin($student["formation"], $id, $type);
 		}
 		if(empty($this->problems)){
 			$this->session->lastAction="importStudent";
 			$this->session->message="Le fichier a bien été importé.";
-			
+
 		}else{
 			$this->session->lastAction="importStudent";
 			$this->session->message=$this->problems;
 		}
-		redirect("student/view");
+		redirect("student/view/".$type);
 	}
-	
+
 	private function createJoin($formation, $id, $type){
-		$id_formation=$this->formationManager->getOne("ypareo", '"'.$formation.'"', 'id');
-		if($id_formation==null){
-			$this->problems.="</br> probleme formation : ".$formation;
-			return false;
-		}
-		if(!empty($this->formationManager->getOneRelation($type, $id, $id_formation))){
-			$this->problems.="<br/> Candidature déjà prise en compte";
+		$goOn=true;
+		if($type=="student" && $this->formationManager->getAllRelationsForOneStudent($type, $id)!=null) $goOn=false;
+		if($goOn){
+			$id_formation=$this->formationManager->getOne("ypareo", '"'.$formation.'"', 'id');
+			if($id_formation==null){
+				$this->problems.="</br> probleme formation : ".$formation;
+				return false;
+			}
+			if(!empty($this->formationManager->getOneRelation($type, $id, $id_formation))){
+				$this->problems.="<br/> Candidature déjà prise en compte";
+			}else{
+				 $this->formationManager->createNewRelation($type,$id, $id_formation, $this->calendarManager->selectAllByFormation($type, $id_formation));
+			}
 		}else{
-			 $this->formationManager->createNewRelation($type,$id, $id_formation, $this->calendarManager->selectAllByFormation($type, $id_formation));
+			$this->problems.="<br/>Admis déjà inscrit";
 		}
 	}
 
-		
+
+
 	private function testHeader($lign){
 		for($i=0; $i<count($lign);$i++){
 			if(isset($this->template[$lign[$i]])){
@@ -159,11 +170,11 @@ class Import extends CI_Controller{
 
 		return true;
 	}
-	
+
 	private function testLign($lign, $row){
 		if(empty($lign))return true;
 		foreach($this->template as $key=>$header){
-			
+
 			if($lign[$header]=="" | $lign[$header]==" "){
 				$this->problems .="<br/>Ligne $row : le champs $key est vide";
 				return false;
@@ -176,7 +187,7 @@ class Import extends CI_Controller{
 		}
 		return true;
     }
-	
+
 
 
 	private function createPassword(){

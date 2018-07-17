@@ -13,7 +13,7 @@
 			<button type="button" id="toHide" onclick="showPopUp('popupSup', 'students')">Supprimer</button>
 			<div id="popupSup" class="popup hidden">
 				<p>Attention !</p>
-				<p>Vous vous apprêtez à supprimer <span id="numDelete"></span> <?php echo $type=="candidate"?"candidat(s)":"apprenti(s)"; ?></p>
+				<p>Vous vous apprêtez à supprimer <span id="numDelete"></span> <?php echo $type=="candidate"?"candidat(s)":"admi(s)"; ?></p>
 				<div>
 					<input type="submit" value="Oui, je sais" class="realDelete"/>
 					<button type="button" onclick="showPopUp(null, null)">Non, surtout pas !</button>
@@ -45,9 +45,11 @@
 						if( !isset($query["formation"]) || (isset($query["formation"]) && $query["formation"]==$formation->id_formation)){
 					?>
 							<tr>
-								<td><a href="<?php echo site_url("formation/admin/".$formation->id_formation); ?>"><?php echo $formation->ypareo; ?></a></td>
-								<td class="status<?php echo $formation->id_status; ?>"><?php echo $formation->status; ?>
-									<?php if($formation->relance==1) echo "<br/><b>".$formation->relance." relance"; ?>
+								<td><a href="<?php echo site_url("formation/admin/".$formation->id_formation."/".$student->type); ?>"><?php echo $formation->ypareo; ?></a></td>
+								<td class="status<?php echo $formation->id_status; ?>">
+									<?php echo $formation->status;
+
+ 								if($formation->relance==1) echo "<br/><b>".$formation->relance." relance"; ?>
 									<?php if($formation->relance>1) echo "<br/><b>".$formation->relance." relances"; ?>
 								</td>
 								<td><?php echo Utils::getFrenchFormat($formation->lastModif); ?></td>
@@ -56,7 +58,13 @@
 						<?php }
 						} ?>
 					</table>
-					<?php }else{echo $student->status;  ?>
+					<?php }else{echo $student->status;
+						if($student->id_status>=10){ ?>
+							<form method="post" action='<?php echo site_url("student/updateStatus/".$thisForm->id."/".$student->id_status."/".$student->id); ?>'>
+								<button type="submit" class="linkBtn"><?php echo $student->status==="Admis" ? "Placer" : "Annuler le placement";?> </button>
+							</form>
+						<?php }
+						?>
 						<?php if($student->relance==1) echo "<br/><b>".$student->relance." relance
 						</b>"; ?>
 						<?php if($student->relance>1) echo "<br/><b>".$student->relance." relances</b>"; ?>

@@ -108,7 +108,7 @@ foreach($meetings as $formation=>$days){ ?>
 				<th class="small" width="7%">En attente</th>
 			</tr>
 			<?php foreach($sessions as $meeting){
-					if($meeting["distant"]==""){
+					if($meeting["distant"]=="" || $meeting["distant"]=="0" ){
 						$location=$meeting["location"];
 					}else{
 						$location=$meeting["distant"];
@@ -163,9 +163,15 @@ foreach($meetings as $formation=>$days){ ?>
 				<th >Emargement</th>
 
 			</tr>
-			<?php foreach($sessions as $meeting){ ?>
+			<?php foreach($sessions as $meeting){
+				if($meeting["distant"]=="" || $meeting["distant"]=="0" ){
+					$location=$meeting["location"];
+				}else{
+					$location=$meeting["distant"];
+					if(isset($meeting['student'])) $location.=$meeting["distant"]=="skype" ? "<br/>".$meeting['student']->email : "<br/>".$meeting['student']->phone;
+				}?>
 			<tr>
-				<td><?php echo $meeting["distant"]!="" ? $meeting["distant"] : $meeting["location"];?></td>
+				<td><?php echo $location;?></td>
 				<td class="horaire small"><?php echo $meeting['hour'];?></td>
 				<td><?php if(isset($meeting['student'])){ ?>
 					<p><?php echo $meeting['student']->name; ?></p>

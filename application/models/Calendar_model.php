@@ -33,7 +33,7 @@ class Calendar_model extends CI_Model{
 			"id_formation"=>$id_formation,
 			"location"=>$location,
 			"particular"=>$id_student!=0 ? true : false,
-			"distant"=>$distant!="" ? $distant : ""
+			"distant"=>$distant!="" || $distant!=0 ? $distant : ""
 		);
 		$this->db->insert($type."_calendar", $data);
 		return $this->db->insert_id();

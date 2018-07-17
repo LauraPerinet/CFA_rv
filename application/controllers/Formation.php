@@ -12,11 +12,12 @@ class Formation extends CI_Controller{
 		$this->load->model('formation_model', 'formationManager');
 		$this->load->model('calendar_model', 'calendarManager');
 		$this->load->model('student_model', 'studentManager');
+		$this->load->model('annonce_model', 'annonceManager');
 		$this->formations=$this->formationManager->getAll();
 		require("Utils.php");
 	}
 
-	public function admin($id_formation=null, $type="candidate"){
+	public function admin($id_formation=null, $type="candidate", $action=null, $id=null){
 
 		if(!isset($this->session->user->type) || $this->session->user->type!=="admin") redirect("pages/accueil/403");;
 		if($id_formation==null) redirect("pages/accueil");
@@ -24,6 +25,9 @@ class Formation extends CI_Controller{
 		$data['problems']=$this->problems;
 		$data["formations"]=$this->formations;
 		$data["olderModif"]=$this->studentManager->getOlderModif($type);
+		if($action=="modifAnnonce" && $id!==null){
+			$data["annonce"]=$this->annonceManager->getOne($id, true);
+		}
 		foreach($this->formations as $formation){
 			if($formation->id==$id_formation){
 				$data['thisForm']=$formation;
@@ -32,33 +36,57 @@ class Formation extends CI_Controller{
 			}
 		}
 
-		if($type=="candidate"){ $subtitle="Candidats";}else{ $subtitle="Apprentis";}
+		if($type=="candidate"){
+			$data['calendar']=$this->getMeetings($id_formation, $type);
+			$subtitle="Candidats";
+		}else{
+			$data['annonces']=$this->annonceManager->getAllByFormationWidthStudents($id_formation);
+			foreach ($data["annonces"]["finish"] as $annonce) {
+					if($annonce->student!=='-1'){
+						$annonce->student=$this->studentManager->getOne("student", "id", $annonce->student);
+					}
+
+			}
+			$subtitle="Apprentis";
+		}
 		//View
 
 
 		$data['classe']="tabContainer";
 		$data['subtitle']=$subtitle;
 		$data['type']=$type;
-		$data['calendar']=$this->getMeetings($id_formation, $type);
+
 		$data['students']=$this->getStudents($id_formation, $type);
 		$data['status']=$this->formationManager->getStatus($type);
 		$data['query'][$type.'_status']= $this->input->post($type.'_status')!==null ? $this->input->post($type.'_status') : "";
 		$data['olderModif']=$this->studentManager->getOlderModif($type);
 
 		$this->load->view('templates/header', $data);
-		if($this->session->lastAction=="createCalendar".$id_formation || $this->session->lastAction=="updateCalendar".$id_formation){
+		if($this->session->lastAction=="createCalendar".$id_formation || $this->session->lastAction=="updateCalendar".$id_formation || $this->session->lastAction=="createAnnonce"){
 			$this->load->view('templates/msgSent');
 		}else{$this->session->lastAction="";}
 		$this->load->view('forms/referents', $data);
 		if(!empty($this->problems)) $this->load->view('admin/problems_import');
 		$this->load->view('admin/openTabsFormation', $data);
-		$this->load->view('forms/importCalendar', $data);
-		$this->load->view('admin/calendar', $data);
+		if($type=="candidate"){
+			$this->load->view('forms/importCalendar', $data);
+			$this->load->view('admin/calendar', $data);
+		}else{
+			$this->load->view('forms/createAnnonce', $data);
+			$this->load->view('admin/listAnnonces', $data);
+		}
+
+
 		if(!empty($data["students"]) && !empty($data['calendar']))$this->load->view('forms/sendEmail', $data);
 		$this->load->view('forms/selectionStudentByFormation', $data);
 		$this->load->view('admin/student_table', $data);
-		$this->load->view('js/scriptCalendar', $data);
-		$this->load->view('js/showPopUp', $data);
+		if($type=="candidate"){
+			$this->load->view('js/scriptCalendar', $data);
+			$this->load->view('js/showPopUp', $data);
+		}else{
+			$this->load->view('js/scriptBlacklist', $data);
+		}
+
 		$this->load->view('js/openMenu', $data);
 		if(!empty($data["students"]) && !empty($data['calendar'])) $this->load->view('js/formEmail', $data);
 		$this->load->view('templates/footer', $data);
@@ -100,7 +128,6 @@ class Formation extends CI_Controller{
 			&& ($this->input->post('hourStop')!==null && !empty($this->input->post('hourStop')))
 			&& ($this->input->post('step')!==null && !empty($this->input->post('step')))
 		){
-
 			$d=new DateTime($this->input->post('date').$this->input->post('hourStart'));
 			$dmax= new DateTime($this->input->post('date').$this->input->post('hourStop'));
 			$type=$this->input->post('type');
@@ -113,7 +140,6 @@ class Formation extends CI_Controller{
 				$i=99;
 			}
 			while($d<$dmax && $i<100){
-
 				$id=$this->calendarManager->createCalendar($type, $d, $id_formation, $this->input->post('location'), $this->input->post("student"), $this->input->post("distant"));
 				$d->add(new DateInterval('PT'.$step.'M'));
 				$i++;
@@ -124,16 +150,13 @@ class Formation extends CI_Controller{
 				$this->formationManager->updateOldStatus($type, $id_formation, $status);
 			}else{
 				$this->checkInscription(1, $id);
-
 				$redirect="formation/checkInscription/1/".$id;
 			}
-
 			$this->session->lastAction="createCalendar".$id_formation;
 			$this->session->message="Le calendrier a été créé.";
 		}else{
 			$this->problems.="Tous les champs sont obligatoires.";
 		}
-
 		redirect($redirect);
 	}
 
@@ -150,7 +173,6 @@ class Formation extends CI_Controller{
 			$this->session->message="La salle a été modifiée.";
 		}
 		$this->session->lastAction="updateCalendar".$formation;
-
 		redirect("formation/admin/".$formation);
 	}
 
@@ -191,14 +213,11 @@ class Formation extends CI_Controller{
 		return $meetings;
 	}
 
-
-
 	private function getStudents($id_formation, $type){
-
 		$status=$this->input->post($type."_status")!=="all" ? $this->input->post($type."_status") : null;
 		return $this->studentManager->getAllStudentsByFormation($type, $id_formation, $status, array("from"=>$this->input->post("from"), "to"=>$this->input->post("to")));
-
 	}
+
 	public function adminInscription(){
 		if($this->input->post("meeting")) $this->checkInscription(1);
 		if($this->input->post("cancelMeeting")){

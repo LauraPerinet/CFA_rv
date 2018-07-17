@@ -20,21 +20,28 @@ function showPopUp( id, popUpTab){
 				if(tab[i].parentNode.classList.contains("notAvailable") && tab[i].checked) problems++;
 			}
 		}
-		if(j>0 || !id){
-			if(hidden=!hidden){
-				deletePopUp.classList.remove("hidden");
-				if(popUpTab=="meetings"){
-					if(problems>0){ numToDelete.classList.remove("hidden");
-					}else{
-						numToDelete.classList.add("hidden");
-					}
+			if(j>0 || !id) popup(popUpTab, j);
+}
+function popup( popUpTab, j){
+
+		var bgpopup=document.getElementById("bgpopup");
+		if(hidden=!hidden){
+			deletePopUp.classList.remove("hidden");
+			bgpopup.classList.remove("hidden");
+			bgpopup.addEventListener("click", popup);
+			if(popUpTab=="meetings"){
+				if(problems>0){ numToDelete.classList.remove("hidden");
 				}else{
-					numToDelete.textContent=j;
+					numToDelete.classList.add("hidden");
 				}
 			}else{
-				deletePopUp.classList.add("hidden");
+				numToDelete.textContent=j;
 			}
-
+		}else{
+			deletePopUp.classList.add("hidden");
+			bgpopup.classList.add("hidden");
+			bgpopup.removeEventListener("click", popup);
 		}
+
 }
 </script>

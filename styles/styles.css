@@ -124,22 +124,28 @@ header nav>ul>li div.submenu li.submenu:hover a{
 	max-width:200px;
 	text-align:center;
 }
+
 .nb p:first-child{
 	font-weight:bold;
 	font-size:3em;
 	color:#0063A1;
+
 }
 .nb p.green{
 	color:#d1dd7e;
+		background-color: #fff;
 }
 .nb p.orange{
 	color:#eabc48;
+		background-color: #fff;
 }
 .nb p.red{
 	color:#ce7862;
+		background-color: #fff;
 }
 .nb p.gray{
 	color:#878189;
+		background-color: #fff;
 }
 
 /*---------------------------------- FOOTER ----*/
@@ -222,7 +228,7 @@ input.realDelete{
 	border-color:#cc0000;
 	background-color: #cc0000;
 }
-input[type="submit"]:hover, button:hover, .btn:hover{
+input[type="submit"]:hover, button:hover:not(.notActif), .btn:hover{
 	color:#0063A1;
 	background-color:white;
 
@@ -252,6 +258,7 @@ input.realDelete:hover{
 	text-align:left;
 	padding-left:0;
 }
+
 .menuBtn button::after{
 	content:"→";
 	font-weight:bold;
@@ -303,8 +310,20 @@ input.realDelete:hover{
 
 
 /*----------------------------- POP UP */
-
+#bgpopup{
+	position:fixed;
+	width:100%;
+	height:100%;
+	background-color:#e1eff7;
+	opacity:0.5;
+	top:0;
+	left:0;
+	z-index:2;
+}
 .popup{
+	position:fixed;
+	top:20%;
+	z-index: 5;
 	background-color:#fff;
 	width:40%;
 	border:3px solid #0063A1;
@@ -319,8 +338,104 @@ input.realDelete:hover{
 
 
 
+/*-------------------------------- ANNONCES */
 
+#formAddAnnonce form{
+	align-items: stretch;
+}
+#formAddAnnonce select{
+	width:80%;
+}
+#formAddAnnonce .info{
+	font-size:0.8em;
+}
+#formAddAnnonce .labelBlackList, .annonce .labelBlackList{
+	text-transform: none;
+	font-size: 0.8em;
+	padding: 2px 5px;
+	margin:5px;
+}
+.menuBtn .annonceTitle{
+	text-transform:none;
+	color:#3b3b3b;
+	padding:10px ;
 
+	border-bottom:1px #afcadb solid;
+	width:100%;
+	display:flex;
+	justify-content: space-between;
+	background-color: #ffffff;
+	margin-top:0;
+}
+.blocAnnonce{
+		border-bottom:1px #afcadb solid;
+}
+
+.menuBtn .annonceTitle:hover{
+	background-color: #f4fbff;
+	transition:1s;
+}
+.menuBtn .annonceTitle.open{
+	border-bottom:none;
+}
+.menuBtn .annonceTitle::after, .menuBtn .annonceTitle.open::after, .menuBtn .annonceTitle:hover::after, .menuBtn .annonceTitle.open:hover::after{
+	content:none;
+}
+
+.annonceTitle span:last-child{
+	font-size:0.8em;
+}
+.notActif:hover{
+	cursor: auto;
+}
+.linkBtn{
+	background:none;
+	text-transform:none;
+	color:#3b3b3b;
+	border:none;
+
+}
+.deleteannonce{
+		color:#c97862;
+}
+.deleteannonce:hover{
+	color:#ea4920 !important;
+}
+.annonce{
+	padding:10px;
+}
+.annonce button{
+	margin-top:0;
+	margin-bottom:20px;
+}
+.annonceTxt{
+	font-size:0.9em;
+	min-width:400px;
+	width:60%;
+	padding:2%;
+}
+.annonceAside{
+	min-width:350px;
+	padding:2%;
+}
+.annonceAside table{
+	border-collapse: collapse;
+	font-size:0.8em;
+}
+.annonceAside table td:first-child{
+	min-width:150px;
+}
+
+.blocAnnonce{
+	display:flex;
+}
+.studentInterest{
+	display: flex;
+	justify-content: space-around;
+}
+#annoncesListe h3, #annoncesListe h4{
+	margin:10px 0;
+}
 /*------------------------------ CALENDAR */
 #calendars {
 	display:flex;
@@ -469,19 +584,19 @@ background: -webkit-linear-gradient(top, #0063A1 0%,#005480 86%,#0063A1 100%); /
 background: linear-gradient(to bottom, #0063A1 0%,#005480 86%,#0063A1 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063A1', endColorstr='#0063A1',GradientType=0 ); /* IE6-9 */
 }
-.studentTable .status1 td.status, td.status1, .studentTable .status4 td.status, td.status4{
+.studentTable .status1 td.status, td.status1, .studentTable .status4 td.status, td.status4, .yellow{ /*yellow*/
 	background-color:#fcf688;
 }
-.studentTable .status5 td.status, .studentTable .status6 td.status, td.status5, td.status6{
+.studentTable .status5 td.status, .studentTable .status6 td.status, td.status5, td.status6, .red{ /*orange*/
 	background-color:#ff7e54;
 }
-.studentTable .status3 td.status, td.status3{
+.studentTable .status3 td.status, .green{ /*green*/
 	background-color:#d1dd7e;
 }
-.studentTable .status7 td.status, td.status7{
+.studentTable .status7 td.status, td.status7{ /*grey*/
 	background-color:#9c969e;
 }
-.studentTable .status2 td.status, td.status2{
+.studentTable .status2 td.status, td.status2{ /*lightblue*/
 	background-color:#c5e5f9;
 }
 
