@@ -791,7 +791,7 @@ table.admin table th{
 	vertical-align:top;
 	margin-top:20px;
 	max-width:50%;
-	min-width:400px;
+	min-width:300px;
 }
 .contact div{
 	display:inline-block;
@@ -831,19 +831,46 @@ table.admin table th{
 	header nav{
 		margin-top:0;
 	}
+	header nav>ul{
+		margin-left: 0;
+	}
 	#logo_cfa{
 		height:130%;
 		width:auto;
 		margin-top:0;
 	}
-	header nav>ul li:last-child, header nav>ul li a {
-		font-size:1em;
+	 header nav>ul li a {
+		font-size:0.8em;
 		text-align:right;
 	}
 	header nav>ul>li:not(:first-child):after{
 		margin-left:0;
 	}
 
+	.hiddeOnMob{
+		display:none;
+	}
+	.contact{
+		display:inherit;
+	}
+	 .contact div{
+		width:100%;
+		max-width:100%;
+	}
+	.contact img{
+		width:
+	}
+	footer{
+		display:inherit;
+		text-align:center;
+	}
+	footer div{
+		display:inherit;
+		float:right;
+		margin-top:20px;
+	}
+
+	/*------------------------------ CANDIDATE ---------------------- */
 	.dayBox{
 		margin:20px 0;
 		max-width:100%;
@@ -875,11 +902,23 @@ table.admin table th{
 		opacity:1;
 		margin-top:0;
 	}
-	.hiddeOnMob{
-		display:none;
-	}
-	.contact img, .contact div{
-		width:100%;
-		max-width:100%;
+
+	/*------------------------------ STUDENT ----------------------------------*/
+
+#annoncesListe .menuBtn .annonceTitle, #annoncesListe .menuBtn .annonceTitle * {
+	display:block;
+}
+#annoncesListe .expiration{
+	font-size:0.8em;
+}
+#annoncesListe .studentInterest{
+	display:inherit;
+}
+#annoncesListe .studentInterest button{
+	width:100%;
+}
+	.popup{
+		min-width:70%;
+		padding:5%;
 	}
 }

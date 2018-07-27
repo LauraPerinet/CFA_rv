@@ -15,6 +15,7 @@ class Pages extends CI_Controller {
 		$data['title'] = ucfirst($page);
 		if(isset($this->session->user) && $this->session->user->type=="student" && $page!=="contacts"){
 			$page="listAnnonces";
+
 			}
 			if(!isset($this->session->user) && $page!=="contacts") redirect("login/view");
 			if($page=="403"){
@@ -31,6 +32,7 @@ class Pages extends CI_Controller {
 			if(isset($this->session->user)){
 				if($this->session->user->type!=="admin"){
 					$data=$this->getStudentData($this->session->user->type);
+					$data['title'] = $this->session->user->type=="student" ? "Annonces" : "Calendrier des entretiens";
 				}else{
 					$data=$this->getAdminData();
 				}
@@ -40,7 +42,10 @@ class Pages extends CI_Controller {
 			$this->load->view('templates/header', $data);
 			$this->load->view($directory.'/'.$page, $data);
 
-			if(isset($this->session->user->type) && $this->session->user->type==="student") 	$this->load->view('js/openMenu', $data);
+			if(isset($this->session->user->type) && $this->session->user->type==="student"){
+				$this->load->view('js/openMenu', $data);
+				$this->load->view('js/scriptAnnonces', $data);
+			}
 			$this->load->view('templates/footer', $data);
 
 	}
