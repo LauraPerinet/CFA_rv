@@ -45,7 +45,7 @@
 						if( !isset($query["formation"]) || (isset($query["formation"]) && $query["formation"]==$formation->id_formation)){
 					?>
 							<tr>
-								<td><a href="<?php echo site_url("formation/admin/".$formation->id_formation."/".$student->type); ?>"><?php echo $formation->ypareo; ?></a></td>
+								<td><a href="<?php echo site_url("formation/admin/".$formation->id_formation."/".$type); ?>"><?php echo $formation->ypareo; ?></a></td>
 								<td class="status<?php echo $formation->id_status; ?>">
 									<?php echo $formation->status;
 

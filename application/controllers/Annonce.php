@@ -8,6 +8,17 @@ class Annonce extends CI_controller{
 		$this->load->model('annonce_model', 'annonceManager');
 		$this->load->model('student_model', 'userManager');
 	}
+	public function view($id_annonce=null){
+		if(!$id_annonce) redirect("pages/accueil");
+		$data["annonce"]=$this->annonceManager->getOne($id_annonce, true);
+		$data['title']="Annonce";
+		$data["formations"] = $this->formationManager->getAll();
+
+		$this->load->view('templates/header', $data);
+		$this->load->view('admin/problems_import', $data);
+		$this->load->view('forms/importStudents', $data);
+		$this->load->view('templates/footer', $data);
+	}
 	public function delete($id_formation){
 		if($this->session->user->type!=="admin") redirect("login/view");
 		$id_annonce=$this->input->post("id_annonce");
@@ -24,6 +35,7 @@ class Annonce extends CI_controller{
 		$data=array(
 			"title"=>$this->input->post("title"),
 			"text"=>nl2br(htmlentities($this->input->post("text"))),
+			"publication"=>date("Y-m-d"),
 			"expiration"=>$this->input->post("date")=='' ? null : $this->input->post("date"),
 			"autonomy"=>$this->input->post("autonomy")!==null ? 1:0,
 			"id_formation"=>$id_formation
@@ -35,7 +47,7 @@ class Annonce extends CI_controller{
 			$this->annonceManager->blackList($id, $blackList);
 			$whiteList=array_values(array_diff($this->userManager->getAllIdByFormation("student", $id_formation, 10), $blackList));
 		}else{$whiteList=$this->userManager->getAllIdByFormation("student", $id_formation, 10);}
-		$this->annonceManager->createResponses($id,$whiteList);
+		if(count($whiteList)) $this->annonceManager->createResponses($id,$whiteList);
 		$this->session->message="L'annonce est en ligne et un email a été envoyé aux admis concernés.";
 
 		$this->session->lastAction="createAnnonce";

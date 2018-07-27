@@ -52,7 +52,14 @@ foreach($types as $type){
 					?>
 					<form method="post" action="<?php echo site_url('annonce/interested');?>" class="studentInterest"/>
 						<input type="hidden" name="id" value="<?php echo $annonce->id; ?>"/>
-						<button type="submit" name="interested" value="yes" class="green" onclick="popup('<?php echo $type; ?>')">Je suis interessé(e)</button>
+						<button type="submit" name="interested" value="yes" class="green" onsubmit="return popupAnnonce('<?php echo $type; ?>')">
+							<?php if($type=="valid"){ ?>
+								Je suis interessé(e)
+							<?php }else{ ?>
+								J'ai candidaté
+							<?php }?>
+
+						</button>
 						<button type="submit" name="interested" value="no" class="red">Je ne suis pas interessé(e)</button>
 					</form>
 				<?php }

@@ -8,6 +8,7 @@ class Student extends CI_Controller{
 		$this->load->model('student_model', 'studentManager');
 		$this->load->model('formation_model', 'formationManager');
 		$this->load->model('calendar_model', 'calendarManager');
+		$this->load->model('annonce_model', 'annonceManager');
 		if(!isset($this->session->user)) redirect("login/view");
 		if(!isset($this->session->user->type) || $this->session->user->type!=="admin") redirect("pages/accueil/403");
 		require("Utils.php");
@@ -43,15 +44,36 @@ class Student extends CI_Controller{
 		$data['type']=$type;
 		$data["student"]=$student;
 		$data["formations"]=$this->formationManager->getAll();
-		foreach($data["formations"] as $formation){
-			$data['calendars'][$formation->ypareo] =$this->getMeetings($formation->id, $type);
+		if($type=="candidate"){
+			foreach($data["formations"] as $formation){
+				$data['calendars'][$formation->ypareo] =$this->getMeetings($formation->id, $type);
+			}
+		}else{
+
 		}
 		$this->load->view('templates/header', $data);
 		if($this->session->lastAction=="updateStudent" || $this->session->lastAction=="meetingStudent" ){
 			$this->load->view('templates/msgSent');
 		}else{$this->session->lastAction="";}
 		$this->load->view('forms/studentForm', $data);
-		$this->load->view('admin/studentFormations', $data);
+		if($type=="candidate"){
+			$this->load->view('admin/studentFormations', $data);
+		}else{
+			$data['annonces']=$this->annonceManager->getAnnoncesByStudent($id);
+			$yes=0;
+			$no=0;
+			foreach($data['annonces'] as $annonce){
+				if($annonce->interested =="yes") $yes++;
+				if($annonce->interested =="no") $no++;
+			}
+			$data['numbers']=array(
+				"all"=>count($data["annonces"]),
+				"yes"=>$yes,
+				"no"=>$no
+			);
+			$this->load->view('admin/studentAnnonces', $data);
+		}
+
 		$this->load->view('js/openMenu', $data);
 		$this->load->view('templates/footer', $data);
 	}
@@ -89,7 +111,7 @@ class Student extends CI_Controller{
 			"relance"=>$this->input->post("relance")
 		);
 
-		$data['type']= $this->input->post('type') ? $this->input->post('type') : "candidate";
+		$data['type']= $this->input->post('type') ? $this->input->post('type') : $type;
 		$data['students']=$this->studentManager->selectStudentsBy($data['query']);
 		$data['status']=$this->formationManager->getStatus($type);
 		$data['subtitle'] = $this->createSubtitle($data);

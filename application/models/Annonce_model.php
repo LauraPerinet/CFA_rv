@@ -24,10 +24,13 @@ class Annonce_model extends CI_Model{
 		if($getData) $annonce=$this->getData($annonce);
 		return $annonce;
 	}
-	public function getAllByFormation(){
-		return $this->db->get("annonce")->result();
+	public function getAllByFormation($id_formation){
+		return $this->db->query("SELECT * FROM annonce WHERE id_formation=".$id_formation)->result();
 	}
 
+	public function getAnnoncesByStudent($id_student){
+		return $this->db->query("SELECT annonce.id, title, publication, expiration, autonomy, interested FROM annonce, response_annonce where id_student=".$id_student." and id_annonce=annonce.id")->result();
+	}
 	public function getAllByFormationWidthStudents($id_formation, $admin=true){
 
 		$annonces["valid"]=$this->db->query("SELECT * from annonce where id_formation=".$id_formation." AND expiration>=CURDATE() AND expiration IS NOT NULL ORDER BY expiration" )->result();

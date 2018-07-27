@@ -18,11 +18,20 @@
 			<ul>
 					<li><a href="<?php echo site_url('pages/accueil'); ?>"><img id="logo_cfa" src="https://www.cfa-sciences.fr/sites/upmc/files/CFA%20des%20sciences%20simple_2.png" alt="Accueil" /></a></li>
 				<?php  if(isset($this->session->user) && $this->session->user->type=="admin") { ?>
-					<li><a href="<?php echo site_url('student/view'); ?>">APPRENTIS</a></li>
+					<li><a href="<?php echo site_url('student/view'); ?>">APPRENTIS</a>
+						<div class="submenu">
+							<ul>
+								<li class="submenu"><a href="<?php echo site_url("student/view/candidate"); ?>">Candidats</a></li>
+								<li class="submenu"><a href="<?php echo site_url("student/view/student"); ?>">Admis</a></li>
+						</div>
+					</li>
 					<li>Formations
 						<div class="submenu">
 							<ul>
-								<?php foreach($formations as $formation){?>
+								<?php if(count($formations)==0){?>
+									<li>Pas de formation enregistrée</li>
+								<?php }
+								foreach($formations as $formation){?>
 									<li class="submenu"><a href="<?php echo site_url('formation/admin/'.$formation->id); ?>"><?php echo $formation->ypareo; ?></a></li>
 
 								<?php }?>

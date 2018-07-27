@@ -17,6 +17,7 @@ class Import extends CI_Controller{
 		$this->load->model('formation_model', 'formationManager');
 		$this->load->model('student_model', 'studentManager');
 		$this->load->model('calendar_model', 'calendarManager');
+		$this->load->model('annonce_model', 'annonceManager');
 	}
 	private function view(){
 		if(!isset($this->session->user->type) || $this->session->user->type!=="admin") redirect("pages/accueil/403");
@@ -135,15 +136,17 @@ class Import extends CI_Controller{
 						$student["student"]["password"]=$oldCandidate->password;
 					}else{
 						$student["student"]["password"]=$this->createPassword();
+						// s'il y a des annonces
+							//creation table réponses
+							//Envoi email avec code
 					}
 
 				}
 				$id=$this->studentManager->createNewStudent($type, $student["student"]);
 
 			}
-
-
 			$this->createJoin($student["formation"], $id, $type);
+
 		}
 		if(empty($this->problems)){
 			$this->session->lastAction="importStudent";
@@ -153,6 +156,7 @@ class Import extends CI_Controller{
 			$this->session->lastAction="importStudent";
 			$this->session->message=$this->problems;
 		}
+		if($type=="student") $this->testAnnonces($this->formationManager->getOne("ypareo", '"'.$student["formation"].'"', 'id'), $id);
 		redirect("student/view/".$type);
 	}
 
@@ -211,7 +215,16 @@ class Import extends CI_Controller{
     }
 
 
+	private function testAnnonces($id_formation, $id_student){
+		$annonces=$this->annonceManager->getAllByFormation($id_formation);
+		if(count($annonces)>0){
+			foreach($annonces as $annonce){
+				$this->annonceManager->whiteList($annonce->id, $id_student);
+			}
+			redirect("emailing/sendEmailFirstAnnonce/".$id_student.'/'.$id_formation);
+		}
 
+	}
 	private function createPassword(){
 		$alphabet=["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 		$password="";

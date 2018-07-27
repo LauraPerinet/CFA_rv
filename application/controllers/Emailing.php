@@ -130,6 +130,10 @@ class Emailing extends CI_Controller{
 		redirect("formation/admin/$id_formation/student");
 	}
 
+	public function sendEmailFirstAnnonce($id_student, $id_formation){
+			$this->sendMessage("welcome_student", $this->formationManager->getOne("id", $id_formation), null, $this->studentManager->getOne("student", "id",$id_student), null, null, null);
+	}
+
 	public function sendEmailAuto($type=null, $id_student=null, $id_formation=null, $fromAdmin=false, $cancel=false){
 		if($type && $id_student && $id_formation){
 			$student=$this->studentManager->getOne($type, "id", $id_student);
@@ -181,7 +185,7 @@ class Emailing extends CI_Controller{
 		if($admin){
 			$stillAvailable=$this->calendarManager->countCalendarStillAvailable($student->type,$formation->id);
 		}else{
-			$url= $formation->url!==null && $formation->url!=="" ? $formation->url : "https://www.cfa-sciences.fr/recherche?keyword=".$formation->ypareo ;
+			if($formation!==null) $url= $formation->url!==null && $formation->url!=="" ? $formation->url : "https://www.cfa-sciences.fr/recherche?keyword=".$formation->ypareo ;
 		}
 		if($typeEmail=="confirmation-entretien" || $typeEmail=="precision-salle" || $typeEmail=="rappel"){
 			$attachment=array(base_url()."img/Plan_CFA_des_Sciences.png");
