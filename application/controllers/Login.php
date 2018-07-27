@@ -50,13 +50,15 @@ class Login extends CI_Controller {
 		if(!strpos($email, "@cfa-sciences.fr") && !strpos($email, "@cci-paris-idf.fr")){
 			$table=$this->input->post('type');
 			$password=$this->input->post("password");
-
 		}else{
 			$table="admin";
 			$password=md5($this->input->post("password"));
 		}
 		$user=$this->studentManager->getOne($table, "email", '"'.$email.'"');
-
+		if($user==null && $table=="candidate"){
+			$table="student";
+			$user=$this->studentManager->getOne($table, "email", '"'.$email.'"');
+		}
 		if($user!=null && $user->password===$password){
 			$this->session->user=$user;
 			$this->session->user->type=$table;

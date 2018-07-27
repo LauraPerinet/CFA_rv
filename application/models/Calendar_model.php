@@ -17,7 +17,6 @@ class Calendar_model extends CI_Model{
 	public function getOneById($type, $id, $oneCol="*"){
 		$col = $oneCol=="*" ? "id, id_".$type." AS id_student, location, distant" : $oneCol;
 		$query="SELECT ".$col." FROM ".$type."_calendar WHERE id=".$id;
-		echo $query;
 		$result=$this->db->query("SELECT ".$col." FROM ".$type."_calendar WHERE id=".$id)->row();
 		return $result ? $oneCol=="*" ? $result : $result->$col : $result;
 	}

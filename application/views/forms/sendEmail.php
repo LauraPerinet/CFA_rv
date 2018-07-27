@@ -1,10 +1,10 @@
 <div >
 <h2>Envoyer un email</h2>
 <div class="form noHidden" >
-	<form action="<?php echo site_url('emailing/sendEmail'); ?>" method="post" id="formEmail">
+	<form action="<?php echo site_url('emailing/sendEmail'); ?>" method="post" id="formEmail" onsubmit="return loaderOn();">
 		<div>
 			<label for="typeEmail">Email :</label>
-			<select name="typeEmail">
+			<select name="typeEmail" id="typeEmail">
 				<option value="prise-de-rendez-vous" selected >Prise de rendez-vous</option>
 				<option value="precision-salle">Précision salle</option>
 				<option value="relance">Relance</option>
@@ -14,12 +14,12 @@
 		</div>
 		<div>
 			<div>
-				<input type="radio" value="selection" name="to" />
-				<label class="inline">Envoyer aux élèves selectionnés (<span class="txtStatus">concernés</span> uniquement)</label>
+				<input type="radio" value="selection" name="to" id="toSelection"/>
+				<label class="inline" for="toSelection">Envoyer aux élèves selectionnés (<span class="txtStatus">concernés</span> uniquement)</label>
 			</div>
 			<div>
-				<input type="radio" value="all" name="to" />
-				<label class="inline" >Envoyer à tous les élèves <span class="txtStatus">concernés</span> </label>
+				<input type="radio" value="all" name="to" id="toAll"/>
+				<label class="inline" for="toAll">Envoyer à tous les élèves <span class="txtStatus">concernés</span> </label>
 			</div>
 		</div>
 		<div>

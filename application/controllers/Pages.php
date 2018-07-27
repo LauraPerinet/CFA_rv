@@ -13,7 +13,7 @@ class Pages extends CI_Controller {
 
 	public function accueil($page='accueil'){
 		$data['title'] = ucfirst($page);
-		if($this->session->user->type=="student" && $page!=="contacts"){
+		if(isset($this->session->user) && $this->session->user->type=="student" && $page!=="contacts"){
 			$page="listAnnonces";
 			}
 			if(!isset($this->session->user) && $page!=="contacts") redirect("login/view");
@@ -35,12 +35,12 @@ class Pages extends CI_Controller {
 					$data=$this->getAdminData();
 				}
 			}
-			$data["addressDefault"]=$this->formationManager->getDefaultAddress()[0];
+			$data["addressDefault"]=$this->studentManager->getDefaultAddress()[0];
 
 			$this->load->view('templates/header', $data);
 			$this->load->view($directory.'/'.$page, $data);
 
-			if($this->session->user->type==="student") 	$this->load->view('js/openMenu', $data);
+			if(isset($this->session->user->type) && $this->session->user->type==="student") 	$this->load->view('js/openMenu', $data);
 			$this->load->view('templates/footer', $data);
 
 	}

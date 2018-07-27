@@ -9,7 +9,9 @@ foreach($annonces as $type=>$annoncesR){
 		<h2>Annonces expirées</h2>
 	<?php }else if($type=="finish") { ?>
 		<h2>Offres pourvues</h2>
-	<?php }else { ?>
+	<?php }else if($type=="autonomy"){ ?>
+		<h2>Candidature autonome</h2>
+	<?php }else{?>
 		<h2>Annonces en cours</h2>
 	<?php }
 	if(count($annoncesR)==0) {?> <p>Aucune annonce enregistrée</p>
@@ -40,26 +42,28 @@ foreach($annonces as $type=>$annoncesR){
 							if($response["interested"]!==null) $nbResponse++;
 						}
 						?>
-						<span>Expire le : <?php echo $annonce->expiration; ?> <span class="yellow"><?php echo $nbResponse; ?> réponse(s) </span> </span>
-					<?php } ?>
+						<?php if($annonce->expiration!==null){ ?><span>Expire le : <?php echo $annonce->expiration; ?>  </span>
+					<?php }
+					} ?>
+					<span class="yellow"><?php echo $nbResponse; ?> réponse(s) </span>
 					</span>
 			</button>
 		</div>
 	<?php } ?>
 		<div class="annonce hidden" id="annonce<?php echo $annonce->id;?>">
 				<button type="button" class="deletepopup linkBtn deleteannonce" data-id-annonce="<?php echo $annonce->id; ?>">Supprimer l'annonce</button>
-				<a href="<?php echo site_url('formation/admin/'.$thisForm->id.'/student/modifAnnonce/'.$annonce->id.'#creationAnnonce'); ?>" class="modifAnnonce">Rééditer l'annonce</a>
+				<!--<a href="<?php echo site_url('formation/admin/'.$thisForm->id.'/student/modifAnnonce/'.$annonce->id.'#creationAnnonce'); ?>" class="modifAnnonce">Rééditer l'annonce</a>-->
 				<?php
-				if($type=="expirate"){ ?>
+				if($type=="expirate" || $type="autonomy"){ ?>
 
 						<form method="post" action="<?php echo site_url('annonce/update');?>" class="inline form noHidden">
 							<input type="hidden" value="<?php echo $annonce->id; ?>" name="id"/>
 							<input type="hidden" value="<?php echo $annonce->id_formation; ?>" name="id_formation"/>
-							<?php if($annonce->cvSent==0){?>
+							<?php if($annonce->cvSent==0 && $type=="expirate"){?>
 									<button type="submit" name="cv">Envoyer les CVs</button>
 							<?php }
 							else if($annonce->student===null){ ?>
-							<label for="student">Apprentis placé : </label>
+							<label>Apprentis placé : </label>
 							<select name="student" >
 									<option id="noBlackList" value="-1">Exterieur</option>
 									<?php  foreach($annonce->response as $response){

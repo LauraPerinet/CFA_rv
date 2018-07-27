@@ -17,10 +17,9 @@
 		<nav>
 			<ul>
 					<li><a href="<?php echo site_url('pages/accueil'); ?>"><img id="logo_cfa" src="https://www.cfa-sciences.fr/sites/upmc/files/CFA%20des%20sciences%20simple_2.png" alt="Accueil" /></a></li>
-				<?php  if(isset($this->session->user)){
-					if($this->session->user->type=="admin"){ ?>
+				<?php  if(isset($this->session->user) && $this->session->user->type=="admin") { ?>
 					<li><a href="<?php echo site_url('student/view'); ?>">APPRENTIS</a></li>
-					<li>Calendriers
+					<li>Formations
 						<div class="submenu">
 							<ul>
 								<?php foreach($formations as $formation){?>
@@ -34,15 +33,21 @@
 						<a href="<?php echo site_url("formation/export"); ?>">Export</a>
 					</li>
 					<li>
-						Admin
+						<a href="<?php echo site_url("admin/formations"); ?>">Admin</a>
 						<div class="submenu">
 							<ul>
 								<li class="submenu"><a href="<?php echo site_url("admin/formations"); ?>">Formations</a></li>
-								<li class="submenu"><a href="<?php echo site_url("admin/referents"); ?>">Référents</a></li>
+								<li class="submenu"><a href="<?php echo site_url("admin/equipe"); ?>">Equipe</a></li>
+								<!--<li class="submenu"><a href="<?php echo site_url("admin/contacts"); ?>">Contacts</a></li>-->
 							</ul>
 						</div>
 					</li>
-				<?php }
+				<?php }else{
+					?>
+					<li><a href="<?php echo site_url('pages/accueil/contacts'); ?>" />Contacts</a></li>
+					<?php
+				}
+				if(isset($this->session->user)){
 				?>
 				<li><a href="<?php echo site_url('login/disconnect'); ?>" />Deconnexion</a></li>
 				<?php } ?>

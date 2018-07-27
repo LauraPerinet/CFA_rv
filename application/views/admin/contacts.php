@@ -9,10 +9,10 @@
 	</div>
 	<div>
 		<h2>Site web</h2>
-		<a href="http://www.cfa-sciences.fr">www.cfa-sciences.fr</a>
+		<a href="http://www.cfa-sciences.fr" target="_blank">www.cfa-sciences.fr</a>
 
 		<h2>Secretariat</h2>
-		<p>01 44 27 71 40</p>  
+		<p>01 44 27 71 40</p>
 		<p><a href="mailto:<?php echo $addressDefault->email; ?>"><?php echo $addressDefault->email; ?></a><p>
 
 		<h2>Plan du site</h2>
@@ -27,6 +27,6 @@
 		<p>Métro Station Jussieu – lignes 7 et 10<br/>
 		SNCF – RER C : Gare d’Austerlitz</p>
 	</div>
-	
-	
+
+
 </div>

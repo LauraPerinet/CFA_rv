@@ -106,11 +106,11 @@ class Emailing extends CI_Controller{
 	}
 	public function sendEmailProblem(){
 		$this->formationManager->updateStatus($this->session->user->type, $this->session->user->id, $this->input->post("id_formation"), 5);
-		$referends=$this->formationManager->getReferends($this->input->post("id_formation"));
+		$referends=$this->studentManager->getStaffsByFormation("admin", $this->input->post("id_formation"));
 
 		foreach($referends as $admin){
 
-			$email=$this->sendMessage($this->input->post('typeEmail'), $this->formationManager->getOne("id", $this->input->post("id_formation")), null, $this->session->user, $admin, $this->input->post("message"));
+			$email=$this->sendMessage($this->input->post('typeEmail'), $this->formationManager->getOne("id", $this->input->post("id_formation")), null, $this->session->user, $admin, nl2br(htmlentities($this->input->post("message"))));
 			$this->session->user->message="Votre message a été envoyé. Nous vous recontacterons prochainement.";
 		}
 
@@ -126,7 +126,7 @@ class Emailing extends CI_Controller{
 				$this->sendMessage("new_annonce", null, null, $student, null, null, $this->annonceManager->getOne($id_annonce));
 			}
 		}
-		
+
 		redirect("formation/admin/$id_formation/student");
 	}
 
@@ -158,7 +158,7 @@ class Emailing extends CI_Controller{
 		}else{
 			$student->message="Nous n'avons pas pu vous envoyer d'email récapitulatif.";
 		}
-		$referends=$this->formationManager->getReferends($student->formation);
+		$referends=$this->studentManager->getStaffsByFormation("admin", $student->formation);
 
 		foreach($referends as $admin){
 			$this->sendMessage($msgAdmin, $formation, $meeting, $student,$admin, null, $distant);
@@ -180,6 +180,8 @@ class Emailing extends CI_Controller{
 		$stillAvailable=10;
 		if($admin){
 			$stillAvailable=$this->calendarManager->countCalendarStillAvailable($student->type,$formation->id);
+		}else{
+			$url= $formation->url!==null && $formation->url!=="" ? $formation->url : "https://www.cfa-sciences.fr/recherche?keyword=".$formation->ypareo ;
 		}
 		if($typeEmail=="confirmation-entretien" || $typeEmail=="precision-salle" || $typeEmail=="rappel"){
 			$attachment=array(base_url()."img/Plan_CFA_des_Sciences.png");

@@ -36,16 +36,33 @@ class Import extends CI_Controller{
 		$data["newFormation"]=$newFormation;
 		$data["formations"] = $this->formationManager->getAll();
 		$data["type"]=$type;
+		$data['referents']=$this->studentManager->getStaffs("admin");
+		$data['staffpart']=$this->studentManager->getStaffs("staffpart");
 		$this->load->helper('form');
 		$this->load->view('templates/header', $data);
 
 		if($newFormation===null){
 			$ypareo=$this->input->post("ypareo");
 			for($i=0; $i<count($ypareo); $i++){
-				$this->formationManager->createOne($ypareo[$i], $this->input->post("formation".$i));
+				$nameFormation= $this->input->post("formation".$i)!=="" ? $this->input->post("formation".$i) : $ypareo[$i];
+				$urlFormation=$this->input->post("url".$i)!=="" ? $this->input->post("url".$i) : null;
+				$id_formation=$this->formationManager->createOne($ypareo[$i], $nameFormation, $urlFormation);
+				$admin=$this->input->post($i.'_admin[]');
+				$staffpart=$this->input->post($i.'_staffpart');
+				for($j=0; $j<count($admin);$j++){
+					if($admin[$j]!==""){
+						 $this->studentManager->addReferend($admin[$j], $id_formation, "admin");
+					}
+				}
+				for($j=0; $j<count($staffpart);$j++){
+					if($staffpart[$j]!==""){
+						 $this->studentManager->addReferend($staffpart[$j], $id_formation, "staffpart");
+					}
+				}
 			}
 			$this->createStudent($this->input->post('type'));
 		}else{
+
 			$this->load->view('forms/createFormations', $data);
 		}
 		$this->load->view('templates/footer', $data);
@@ -113,8 +130,13 @@ class Import extends CI_Controller{
 			if(!(isset($id))){
 				if($type=="student"){
 					$oldCandidate=$this->studentManager->getOne("candidate", "email", '"'.$student["student"]["email"].'"');
-					$this->studentManager->deleteStudent("candidate", $oldCandidate->id);
-					if($oldCandidate!==null) $student["student"]["password"]=$oldCandidate->password;
+					if($oldCandidate!==null){
+						$this->studentManager->deleteStudent("candidate", $oldCandidate->id);
+						$student["student"]["password"]=$oldCandidate->password;
+					}else{
+						$student["student"]["password"]=$this->createPassword();
+					}
+
 				}
 				$id=$this->studentManager->createNewStudent($type, $student["student"]);
 

@@ -35,7 +35,7 @@ Le secretariat du CFA des SCIENCES\n
 secretariat@cfa-sciences.fr";
 
 $message_html="<html><head></head><body><p style='margin-bottom:20px;'>Bonjour,</p>
-<pstyle='margin-bottom:20px;'> Nous vous confirmons que votre entretien de motivation pour la formation ".$formation->formation." se déroulera :</p>
+<p style='margin-bottom:20px;'> Nous vous confirmons que votre entretien de motivation pour la formation <a href='".$url."'>".$formation->formation."</a> se déroulera :</p>
 
 <p style='text-align:center;'>".$day." à  ".$hour[0]."h".$hour[1]."</p>";
 

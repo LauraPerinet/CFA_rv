@@ -1,6 +1,6 @@
 
 <div class="form naturalDisplay">
-	<?php echo form_open('emailing/sendEmailProblem'); ?>
+	<form method="post" action="<?php echo site_url('emailing/sendEmailProblem'); ?>" onsubmit="return loaderOn();">
 		<div class="left">
 			<p class="left">Merci de nous expliquer la ou les raisons de votre impossibilité. Nous vous recontacterons afin de trouver un arrangement.</p>
 		</div>

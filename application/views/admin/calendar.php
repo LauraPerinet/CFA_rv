@@ -77,7 +77,7 @@
 			</button>
 		</div>
 		<div class="form " id="formChangeLocation">
-				<label class="inline">Salle : </label><input name="location" placeholder="Ex : Bâtiment Esclangon - salle 203" class="long">
+				<label class="inline" for="room">Salle : </label><input name="location" placeholder="Ex : Bâtiment Esclangon - salle 203" class="long" id="room">
 				<input type="submit" name="changeLocation" value="Changer la salle" />
 
 		</div>

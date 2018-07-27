@@ -29,10 +29,13 @@ class Annonce_model extends CI_Model{
 	}
 
 	public function getAllByFormationWidthStudents($id_formation, $admin=true){
-		$annonces["valid"]=$this->db->query("SELECT * from annonce where id_formation=".$id_formation." AND expiration>=CURDATE() ORDER BY expiration" )->result();
-		$annonces["expirate"]=$this->db->query("SELECT * from annonce where id_formation=".$id_formation." AND expiration<CURDATE() AND student IS NULL ORDER BY expiration" )->result();
+
+		$annonces["valid"]=$this->db->query("SELECT * from annonce where id_formation=".$id_formation." AND expiration>=CURDATE() AND expiration IS NOT NULL ORDER BY expiration" )->result();
+		$annonces["expirate"]=$this->db->query("SELECT * from annonce where id_formation=".$id_formation." AND expiration<CURDATE() AND expiration IS NOT NULL AND student IS NULL ORDER BY expiration" )->result();
 		$annonces['finish']=$this->db->query("SELECT * from annonce where id_formation=".$id_formation." AND student IS NOT NULL")->result();
+		$annonces["autonomy"]=$this->db->query("SELECT * from annonce where id_formation=".$id_formation." AND expiration IS null")->result();
 //	$annonces=$this->db->get_where("annonce", array("id_formation"=>$id_formation))->result();
+
 if($admin){
 		foreach($annonces as $type){
 			foreach($type as $annonce){
@@ -51,13 +54,12 @@ if($admin){
 	}
 	public function whiteList($id_annonce, $id_student){
 		$this->db->delete("blacklist", array("id_annonce"=>$id_annonce, "id_student"=>$id_student));
-		$this->db->query("INSERT INTO response_annonce ( id_annonce, id_student, interested) VALUES (".$id_annonce.", ".$id_student.", null)");
+		$this->db->query('INSERT INTO response_annonce ( id_annonce, id_student, interested) VALUES ('.$id_annonce.', '.$id_student.', null)');
 
 	}
 	public function createResponses( $id_annonce, $students){
 		$query="INSERT INTO response_annonce ( id_annonce, id_student, interested) VALUES";
 		for($i=0; $i<count($students) ; $i++){
-			echo $students[$i];
 				$query.=" (".$id_annonce.", ".$students[$i].", null)";
 				if($i<count($students)-1) $query.=',';
 		}
@@ -80,7 +82,7 @@ if($admin){
 		$blacklist=$this->db->query("select id_student as id from blacklist where id_annonce=".$annonce->id);
 		$annonce->blacklist=[];
 		$annonce->response=[];
-		$annonce->expiration=Utils::getFullDate($annonce->expiration);
+		if($annonce->expiration) $annonce->expiration=Utils::getFullDate($annonce->expiration);
 		foreach ($blacklist->result() as $row){
 			array_push($annonce->blacklist,$this->db->query("select id, name, firstname from student where id=".$row->id)->row());
 		}
@@ -89,7 +91,8 @@ if($admin){
 		$student=$this->db->query("select id, name, firstname from student where id=".$row->id)->row();
 			array_push(
 				$annonce->response,
-				array("student"=>$student, "interested"=>$row->interested, "commentaire"=>$row->commentaire));
+				array("student"=>$student, "interested"=>$row->interested, "commentaire"=>$row->commentaire)
+			);
 		}
 		return $annonce;
 	}

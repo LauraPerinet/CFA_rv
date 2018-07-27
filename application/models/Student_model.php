@@ -93,11 +93,60 @@ class Student_model extends CI_Model{
 		return $query;
 	}
 
-	public function deleteAdmin($id){
-		$this->db->query("DELETE FROM admin_formation WHERE id_admin=".$id);
-		$this->db->query("DELETE FROM admin WHERE id=".$id);
+	public function deleteStaffs( $id, $type="admin" ){
+		$this->db->query("DELETE FROM ".$type."_formation WHERE id_".$type."=".$id);
+		$this->db->query("DELETE FROM ".$type." WHERE id=".$id);
 	}
 
+	public function getStaffsByFormation($type, $id_formation){
+		$ref=$this->db->query("SELECT * FROM ".$type.", ".$type."_formation where id_formation=".$id_formation." AND ".$type.".id=".$type."_formation.id_".$type)->result();
+		if($type==="admin" && count($ref)==0) $ref=$this->getDefaultAddress();
+
+		return $ref;
+	}
+	public function getDefaultAddress(){
+		$ref=$this->db->query("SELECT * FROM admin where DefaultRef=1")->result();
+		return $ref;
+	}
+
+	public function deleteReferend($id_formation, $type){
+		$this->db->query("DELETE FROM ".$type."_formation WHERE id_formation=".$id_formation);
+	}
+
+	public function deleteReferendByStaff($id_admin, $type){
+		$this->db->query("DELETE FROM ".$type."_formation WHERE id_".$type."=".$id_admin);
+	}
+	public function updateStaff($id_admin, $type, $data){
+		$this->db->set($data);
+		$this->db->where('id', $id_admin);
+		$this->db->update($type);
+	}
+	public function getOneStaff($type, $id_admin){
+		$admin=$this->db->query("SELECT * FROM ".$type." where id=".$id_admin)->row();
+		$admin->formations=$this->db->query("SELECT id_formation, ypareo FROM ".$type."_formation, formation WHERE id_".$type."=".$admin->id." AND id_formation=formation.id")->result();
+		return $admin;
+	}
+
+	public function addReferend($admin, $id_formation, $type="admin"){
+		$data=array(
+			"id_".$type=>$admin,
+			"id_formation"=>$id_formation
+		);
+		$this->db->insert($type."_formation", $data);
+	}
+	public function getStaffs($type="admin", $id_formation=null){
+		$admins=$this->db->query("SELECT * FROM ".$type)->result();
+
+		foreach($admins as $admin){
+				if($id_formation){
+					$admin->isRef=$this->db->query("SELECT * FROM ".$type."_formation WHERE id_".$type."=".$admin->id." AND id_formation=".$id_formation)->row();
+				}else{
+					$admin->formations=$this->db->query("SELECT id_formation, ypareo FROM ".$type."_formation, formation WHERE id_".$type."=".$admin->id." AND id_formation=formation.id")->result();
+				}
+		}
+
+		return $admins;
+	}
 	public function getStudentByAnnonce($id_annonce){
 		$query="SELECT DISTINCT student.id, `name`, `firstname`, `email`, `formation`, `password` from student, formation, student_formation, annonce where
 		annonce.id=".$id_annonce." AND
@@ -107,4 +156,5 @@ class Student_model extends CI_Model{
 		  student.id NOT IN (select id_student from blacklist where id_annonce=annonce.id)";
 		return $this->db->query($query)->result();
 	}
+
 }

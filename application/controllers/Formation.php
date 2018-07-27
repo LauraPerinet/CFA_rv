@@ -21,7 +21,8 @@ class Formation extends CI_Controller{
 
 		if(!isset($this->session->user->type) || $this->session->user->type!=="admin") redirect("pages/accueil/403");;
 		if($id_formation==null) redirect("pages/accueil");
-		$data['admin']=$this->getAdmins($id_formation);
+		$data['admin']=$this->getStaffs("admin",$id_formation);
+		$data['staffpart']=$this->getStaffs("staffpart",$id_formation);
 		$data['problems']=$this->problems;
 		$data["formations"]=$this->formations;
 		$data["olderModif"]=$this->studentManager->getOlderModif($type);
@@ -65,7 +66,7 @@ class Formation extends CI_Controller{
 		if($this->session->lastAction=="createCalendar".$id_formation || $this->session->lastAction=="updateCalendar".$id_formation || $this->session->lastAction=="createAnnonce"){
 			$this->load->view('templates/msgSent');
 		}else{$this->session->lastAction="";}
-		$this->load->view('forms/referents', $data);
+		$this->load->view('forms/oneFormationForm', $data);
 		if(!empty($this->problems)) $this->load->view('admin/problems_import');
 		$this->load->view('admin/openTabsFormation', $data);
 		if($type=="candidate"){
@@ -75,7 +76,6 @@ class Formation extends CI_Controller{
 			$this->load->view('forms/createAnnonce', $data);
 			$this->load->view('admin/listAnnonces', $data);
 		}
-
 
 		if(!empty($data["students"]) && !empty($data['calendar']))$this->load->view('forms/sendEmail', $data);
 		$this->load->view('forms/selectionStudentByFormation', $data);
@@ -90,8 +90,6 @@ class Formation extends CI_Controller{
 		$this->load->view('js/openMenu', $data);
 		if(!empty($data["students"]) && !empty($data['calendar'])) $this->load->view('js/formEmail', $data);
 		$this->load->view('templates/footer', $data);
-
-
 	}
 
 	public function inscription($id_formation=null){
@@ -203,12 +201,16 @@ class Formation extends CI_Controller{
 		foreach($this->calendarManager->selectAllByFormation($type, $id_formation, $getParticular) as $calendar){
 			$date=explode(" ", $calendar->dateRV);
 			$fullDate;
+			$goOn=true;
+			if($this->session->user->type!=="admin"){
+				if(!Utils::canStillChange(date($date[0]))) $goOn=false;
+			}
 			if($day!==$date[0]){
 				$day=$date[0];
 				$fullDate=Utils::getFullDate($day);
 				$meetings[$fullDate]=array();
 			}
-			array_push($meetings[$fullDate], array("id"=>$calendar->id,"hour"=>substr($date[1], 0, 5), "id_student"=> $type=="student" ? $calendar->id_student : $calendar->id_candidate, "location"=>$calendar->location, "distant"=>$calendar->distant, "particular"=>$calendar->particular ));
+			if($goOn) array_push($meetings[$fullDate], array("id"=>$calendar->id,"hour"=>substr($date[1], 0, 5), "id_student"=> $type=="student" ? $calendar->id_student : $calendar->id_candidate, "location"=>$calendar->location, "distant"=>$calendar->distant, "particular"=>$calendar->particular ));
 		}
 		return $meetings;
 	}
@@ -316,19 +318,32 @@ class Formation extends CI_Controller{
 
 	}
 
-	public function changeReferend(){
-		$id_formation=$this->input->post("id_formation");
-		$this->formationManager->deleteReferend($id_formation);
+	public function updateFormation($id_formation, $fromAdmin=false){
+		$url=$this->input->post('url')!=="" || $this->input->post('url')!==null ? $this->input->post('url') : null;
+		$this->formationManager->updateFormation($id_formation, $this->input->post('name'), $url);
+		$this->changeReferend($id_formation, $fromAdmin);
+	}
+	public function changeReferend($id_formation, $fromAdmin=false){
+		$this->studentManager->deleteReferend($id_formation, "admin");
+		$this->studentManager->deleteReferend($id_formation, "staffpart");
 		if(count($this->input->post("admin"))>0){
 			foreach($this->input->post("admin") as $admin){
-				$this->formationManager->addReferend($admin, $id_formation);
+				$this->studentManager->addReferend($admin, $id_formation, "admin");
 			}
 		}
+		if(count($this->input->post("staffpart"))>0){
+			foreach($this->input->post("staffpart") as $admin){
+				$this->studentManager->addReferend($admin, $id_formation, "staffpart");
+			}
+		}
+		$this->session->message="La formation a été modifiée.";
+		$this->session->lastAction="updateFormation";
+		if($fromAdmin) redirect("admin/formations");
 		redirect("formation/admin/".$id_formation);
 	}
 
-	private function getAdmins($id_formation){
-		return $this->formationManager->getAdmins($id_formation);
+	private function getStaffs($type="admin", $id_formation){
+		return $this->studentManager->getStaffs($type, $id_formation);
 
 	}
 

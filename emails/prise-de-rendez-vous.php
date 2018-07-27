@@ -1,7 +1,7 @@
 <?php
 
 $subject = "Entretien CFA des SCIENCES";
-				
+
 $message_txt="Bonjour, \n
 Vous avez postulé à la formation ".$formation->formation." au CFA des Sciences et nous sommes heureux de vous informer que votre candidature a été retenue par le jury pour un entretien de motivation.\n
 Les entretiens se dérouleront ".$meeting["days"]." à Sorbonne Université sur le Campus Pierre et Marie Curie, 4 place Jussieu 75005 Paris. La salle vous sera précisée ultérieurement.\n
@@ -13,7 +13,7 @@ Le secretariat du CFA des SCIENCES\n
 secretariat@cfa-sciences.fr";
 
 $message_html="<html><head></head><body><p style='margin-bottom:20px;'>Bonjour,</p>
-<p style='margin-bottom:20px;'>Vous avez postulé à la formation ".$formation->formation." au CFA des Sciences et nous sommes heureux de vous informer que votre candidature a été retenue par le jury pour un entretien de motivation.</p>
+<p style='margin-bottom:20px;'>Vous avez postulé à la formation <a href='".$url."'>".$formation->formation."</a> au CFA des Sciences et nous sommes heureux de vous informer que votre candidature a été retenue par le jury pour un entretien de motivation.</p>
 <p>Les entretiens se dérouleront ".$meeting["days"]." à Sorbonne Université sur le Campus Pierre et Marie Curie, 4 place Jussieu 75005 Paris. La salle vous sera précisée ultérieurement.</p>
 <p>Nous vous remercions de vous positionner sur un créneau horaire en vous connectant avec votre adresse email sur <a href='".$this->config->base_url()."'>".$this->config->base_url()."</a></p>
 <p style='margin-bottom:20px;'>Votre mot de passe pour la connexion est ".$student->password.".</p>

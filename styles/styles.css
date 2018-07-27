@@ -2,6 +2,10 @@
 	a{
 		text-decoration:none;
 		color:#474747;
+		transition: color 0.5s;
+	}
+	a:hover{
+		color:#006699;
 	}
 html{
 	box-sizing:border-box;
@@ -30,6 +34,9 @@ h2{
 	font-size:18px;
 	margin:20px 0 10px 0;
 }
+h3{
+	margin:20px 0 10px 0;
+}
 h1:after{
 	content:"";
 	display:inline-block;
@@ -37,6 +44,9 @@ h1:after{
     bottom: 6px;
     width: 37px;
     border-bottom: 3px solid #474747;
+}
+.center{
+	text-align:center;
 }
 /*-------------------------- HEADER */
 
@@ -151,12 +161,19 @@ header nav>ul>li div.submenu li.submenu:hover a{
 /*---------------------------------- FOOTER ----*/
 footer{
 	padding:30px 0;
-	text-align:right;
+	display:flex;
+	justify-content: space-between;
+	align-items: center;
 }
-footer a{
-	padding-right:30px;
-	font-weight:bold;
+footer div{
+	display:flex;
+	justify-content: right;
+	align-items: center;
 }
+footer  div a:first-child img{
+	height:70px;
+}
+
 
 /*---------------------------------- FORMULAIRES */
 
@@ -204,7 +221,7 @@ textarea{
 }
 input.long{
 	min-width:300px;
-
+	width:100%;
 }
 input[type="submit"], button, .btn{
 	background: #0063A1;
@@ -264,6 +281,11 @@ input.realDelete:hover{
 	font-weight:bold;
 	font-size:1.5em;
 }
+.back::before{
+	content:"←";
+	font-weight:bold;
+	font-size:1.5em;
+}
 .menuBtn button:hover::after, .menuBtn button.open::after{
 	content:"↓";
 }
@@ -310,7 +332,7 @@ input.realDelete:hover{
 
 
 /*----------------------------- POP UP */
-#bgpopup{
+#bgpopup, #bgloader{
 	position:fixed;
 	width:100%;
 	height:100%;
@@ -319,6 +341,21 @@ input.realDelete:hover{
 	top:0;
 	left:0;
 	z-index:2;
+}
+#bgloader{
+	background-color:#fff;
+	background-image: url('../img/loader.gif');
+	background-repeat: no-repeat;
+	background-position: center;
+	opacity:1;
+	text-align:center;
+}
+#bgloader img{
+	margin:20px 0;
+	width:20%;
+	max-width:218px;
+	min-width:70px;
+
 }
 .popup{
 	position:fixed;
@@ -389,16 +426,19 @@ input.realDelete:hover{
 	cursor: auto;
 }
 .linkBtn{
+	font-weight:bold;
+	font-size:14px;
 	background:none;
 	text-transform:none;
 	color:#3b3b3b;
 	border:none;
-
+	padding:0;
+	margin:0;
 }
-.deleteannonce{
+.deleteannonce, .deletebtn{
 		color:#c97862;
 }
-.deleteannonce:hover{
+.deleteannonce:hover, .deletebtn:hover{
 	color:#ea4920 !important;
 }
 .annonce{
@@ -441,6 +481,7 @@ input.realDelete:hover{
 	display:flex;
 
 }
+
 .dayBox{
 	background-color:#e7e7e7;
 	box-shadow:0 5px 5px rgba(0,0,0,0.5);
@@ -590,16 +631,33 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063A1', end
 .studentTable .status5 td.status, .studentTable .status6 td.status, td.status5, td.status6, .red{ /*orange*/
 	background-color:#ff7e54;
 }
-.studentTable .status3 td.status, .green{ /*green*/
+.studentTable .status3 td.status, td.status3, .green{ /*green*/
 	background-color:#d1dd7e;
 }
-.studentTable .status7 td.status, td.status7{ /*grey*/
+.studentTable .status7 td.status, td.status7, .grey{ /*grey*/
 	background-color:#9c969e;
 }
-.studentTable .status2 td.status, td.status2{ /*lightblue*/
+.studentTable .status2 td.status, td.status2, .blue{ /*lightblue*/
 	background-color:#c5e5f9;
 }
 
+/* ----------------CREATION formations */
+
+.bloc_formation_creation{
+	display:flex;
+	justify-content: space-between;
+	border-bottom:1px solid #0063A1;
+	padding:20px 0;
+}
+
+
+.bloc_formation_creation label{
+	display:block;
+}
+.bloc_formation_creation select{
+	display:block;
+	margin-bottom:10px;
+}
 /*------------------- PAGE EXPORT */
 .pageExport .formation h2:not(:first-child){
 	display:none;
@@ -682,7 +740,33 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063A1', end
 }
 
 
-/*---------------------------ESCPACE ETUDIANTS ------ */
+/*--------------------------- ESPACE ADMIN --------------- */
+table.admin{
+	border-collapse: collapse;
+	font-size:0.8em;
+	width:100%;
+}
+
+table.admin td, table.admin th{
+	border:0;
+	border-bottom:1px #afcadb solid;
+	padding:5px;
+}
+table.admin li{
+	list-style: disc inside;
+}
+table.admin table{
+	width:100%;
+}
+table.admin table td, table.admin table th{
+	border:none;
+	text-align:left;
+}
+table.admin table th{
+	width:20%;
+}
+
+/*---------------------------ESPACE ETUDIANTS ------ */
 .liste_formation_student h4{
 	padding:10px 0 20px 0;
 	margin-top:30px;
@@ -705,6 +789,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063A1', end
 
 .contact img{
 	vertical-align:top;
+	margin-top:20px;
 	max-width:50%;
 	min-width:400px;
 }
@@ -724,7 +809,12 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0063A1', end
 	width:3cm;
 
 }
-
+.linkFormation{
+	font-size:0.8em;
+}
+.linkFormation::before{
+		content:"→";
+}
 
 
 

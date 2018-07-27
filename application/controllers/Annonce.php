@@ -18,12 +18,14 @@ class Annonce extends CI_controller{
 
 	}
 	public function create(){
+
 		if($this->session->user->type!=="admin") redirect("login/view");
 		$id_formation=$this->input->post('id_formation');
 		$data=array(
 			"title"=>$this->input->post("title"),
 			"text"=>nl2br(htmlentities($this->input->post("text"))),
-			"expiration"=>$this->input->post("date"),
+			"expiration"=>$this->input->post("date")=='' ? null : $this->input->post("date"),
+			"autonomy"=>$this->input->post("autonomy")!==null ? 1:0,
 			"id_formation"=>$id_formation
 		);
 

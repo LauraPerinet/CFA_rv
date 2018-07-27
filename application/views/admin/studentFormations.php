@@ -13,17 +13,17 @@
 	</button>
 </div>
 	<div class="form" id="formAddSession<?php echo $formation->id_formation; ?>">
-		<form action="<?php echo site_url('formation/createCalendar'); ?>" method="post" enctype="multipart/form-data" >
+		<form action="<?php echo site_url('formation/createCalendar'); ?>" method="post" enctype="multipart/form-data" onsubmit="return loaderOn();">
 
 			<div  class="left">
 				<p>
 					<label for="date" class="inline">Date : </label> <input type="date" name="date" placeholder="jj/mm/dddd" required />
 
-					<label for="hourStart" class="inline">De </label><input type="time" name="hourStart" value="09:00" required /> <label for="hourStop" class="inline"> à </label> <input type="time" name="hourStop" value="12:00"/>
+					<label for="hourStart" class="inline">De </label><input type="time" name="hourStart"  id="hourStart" value="09:00" required /> <label for="hourStop" class="inline"> à </label> <input type="time" name="hourStop" id="hourStop" value="12:00"/>
 				</p>
 				<p>
 					<label for="location" class="inline">Salle</label>
-					<input name="location" placeholder="Ex : Bâtiment Esclangon - salle 203" class="long"></p>
+					<input name="location" placeholder="Ex : Bâtiment Esclangon - salle 203" class="long" id="location"></p>
 				<p>
 					<input type="checkbox" name="distant" value="skype" /> Skype  |
 					<input type="checkbox" name="distant" value="facetime" /> Facetime |
@@ -47,7 +47,7 @@
 
 		</form>
 	</div>
-	<form method="post" action="<?php echo site_url('formation/adminInscription'); ?>">
+	<form method="post" action="<?php echo site_url('formation/adminInscription'); ?>" onsubmit="return loaderOn();">
 		<div id="calendars" class="student">
 			<?php
 			$i=0;
@@ -77,7 +77,7 @@
 									<p>
 										<input type="radio" name="distant" value="skype" <?php if($meeting['distant']==="skype") echo "checked"; ?> /> skype   |
 										<input type="radio" name="distant" value="facetime" <?php if($meeting['distant']==="facetime") echo "checked"; ?> /> facetime   |
-										<input type="radio" name="distant" value="telephone" <?php if($meeting['distant']==="telephone") echo "checked"; ?> /> telephone  
+										<input type="radio" name="distant" value="telephone" <?php if($meeting['distant']==="telephone") echo "checked"; ?> /> telephone
 									</p>
 									<button type="submit" value="<?php echo $meeting["id"]; ?>" name="meeting">Inscrire</button>
 									<?php if($meeting["id_student"]===$student->id){?>

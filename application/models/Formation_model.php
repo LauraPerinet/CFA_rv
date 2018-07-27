@@ -8,12 +8,14 @@ class Formation_model extends CI_Model{
 		if($result==null) return null;
 		return $oneCol=="*"? $result : $result->$oneCol;
 	}
-	public function createOne($ypareo, $name){
+	public function createOne($ypareo, $name, $url=null){
 		$data=array(
 			"ypareo"=>$ypareo,
-			"formation"=>$name
+			"formation"=>$name,
+			"url"=>$url
 		);
 		$this->db->insert('formation', $data);
+		return $this->db->insert_id();
 	}
 	public function getAllRelationsForOneStudent($type, $id_student){
 		return $this->db->query(
@@ -67,8 +69,8 @@ class Formation_model extends CI_Model{
 
 		$this->db->query($query);
 	}
-	public function updateFormation($id_formation, $name){
-		$this->db->query("UPDATE formation SET formation='".$name."' WHERE id=".$id_formation);
+	public function updateFormation($id_formation, $name, $url=null){
+		$this->db->query('UPDATE formation SET formation="'.$name.'", url="'.$url.'" WHERE id='.$id_formation);
 		//$this->db->set("formation", $name)->where("id", $id_formation)->update("formation");
 	}
 	public function testDeleteFormation($id_formation){
@@ -91,6 +93,8 @@ class Formation_model extends CI_Model{
 		$this->db->query('DELETE FROM candidate_calendar WHERE id_formation='.$id_formation);
 		$this->db->query('DELETE FROM student_formation WHERE id_formation='.$id_formation);
 		$this->db->query('DELETE FROM candidate_formation WHERE id_formation='.$id_formation);
+		$this->db->query('DELETE FROM admin_formation WHERE id_formation='.$id_formation);
+		$this->db->query('DELETE FROM staffpart_formation WHERE id_formation='.$id_formation);
 		$this->db->query('DELETE FROM formation WHERE id='.$id_formation);
 
 
@@ -110,7 +114,8 @@ class Formation_model extends CI_Model{
 		if($type) $query.=' WHERE type="'.$type.'"';
 		return $this->db->query($query)->result();
 	}
-	public function getReferends($id_formation){
+	/*
+	public function getStaffs($id_formation){
 		$ref=$this->db->query("SELECT * FROM admin, admin_formation where id_formation=".$id_formation." AND admin.id=admin_formation.id_admin")->result();
 		if(count($ref)==0) $ref=$this->getDefaultAddress();
 
@@ -121,28 +126,31 @@ class Formation_model extends CI_Model{
 		return $ref;
 	}
 
-	public function deleteReferend($id_formation){
+	public function deleteReferend($id_formation, $type){
 
-		$this->db->query("DELETE FROM admin_formation WHERE id_formation=".$id_formation);
+		$this->db->query("DELETE FROM ".$type."_formation WHERE id_formation=".$id_formation);
 	}
-	public function addReferend($admin, $id_formation){
-
+	public function addReferend($admin, $id_formation, $type="admin"){
 		$data=array(
-			"id_admin"=>$admin,
+			"id_".$type=>$admin,
 			"id_formation"=>$id_formation
 		);
-		$this->db->insert("admin_formation", $data);
+		$this->db->insert($type."_formation", $data);
 	}
-	public function getAdmins($id_formation=null){
-		$admins=$this->db->query("SELECT * FROM admin")->result();
-		if($id_formation){
-			foreach($admins as $admin){
-				$admin->isRef=$this->db->query("SELECT * FROM admin_formation WHERE id_admin=".$admin->id." AND id_formation=".$id_formation)->row();
-			}
+	public function getStaffs($type="admin", $id_formation=null){
+		$admins=$this->db->query("SELECT * FROM ".$type)->result();
+
+		foreach($admins as $admin){
+				if($id_formation){
+					$admin->isRef=$this->db->query("SELECT * FROM ".$type."_formation WHERE id_".$type."=".$admin->id." AND id_formation=".$id_formation)->row();
+				}else{
+					$admin->formations=$this->db->query("SELECT id_formation, ypareo FROM ".$type."_formation, formation WHERE id_".$type."=".$admin->id." AND id_formation=formation.id")->result();
+				}
 		}
+
 		return $admins;
 	}
-
+*/
 
 
 

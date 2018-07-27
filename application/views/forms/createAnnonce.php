@@ -9,17 +9,20 @@
 	<div  class="left">
 		<p>
 			<label for="title" class="inline">Intitulé de l'annonce</label>
-			<input name="title" placeholder="Ex : Développeur web full stack" class="long" value="<?php if(isset($annonce)) echo $annonce->title;?>" >
+			<input id="title" name="title" placeholder="Ex : Développeur web full stack" class="long" value="<?php if(isset($annonce)) echo $annonce->title;?>" >
 		</p>
 		<p>
 				<label for="text" >Descriptif</label>
 				<textarea name="text" placeholder="Descriptif de l'annonce" id="text" required><?php if(isset($annonce)) echo $annonce->text;?></textarea>
 		</p>
 	</div>
-	<div>
+	<div class="left">
 		<p>
-			<label for="date" class="inline">Date d'expiration : </label> <input type="date" name="date" placeholder="jj/mm/dddd" required id="date" />
-
+			<input type="checkbox" name="autonomy"  id="autonomy" />
+			<label for="autonomy" class="inline"> Contacter directement l'entreprise </label>
+		</p>
+		<p>
+			<label for="date" class="inline">Date d'expiration : </label> <input type="date" name="date" placeholder="jj/mm/dddd" id="date" />
 		</p>
 		<p>
 			<label for="studentWhiteList">Admis non concernés</label>
@@ -40,9 +43,24 @@
 
 			<input type="hidden" name="id_formation" value="<?php echo $thisForm->id; ?>" />
 
-			<button >Envoyer l'annonce</button>
+			<button onclick="testValid()">Envoyer l'annonce</button>
 		</p>
 	</div>
 
 </form>
 </div>
+<script>
+// createAnnonce script
+var autonomy=document.getElementById("autonomy");
+var date=document.getElementById("date");
+
+function testValid(){
+
+	if(autonomy.checked==false && date.value==""){
+
+		date.setCustomValidity('Vous devez indiquer une limite d\'envoi des CVs ou cocher " Contacter directement l\'entreprise"');
+	}else{
+		date.setCustomValidity('');
+	}
+}
+</script>
